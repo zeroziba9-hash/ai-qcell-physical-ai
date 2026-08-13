@@ -23,6 +23,7 @@ setup(
         "console_scripts": [
             "camera_node = ai_qcell_ros.camera_node:main",
             "inspection_node = ai_qcell_ros.inspection_node:main",
+            "mock_inspection_node = ai_qcell_ros.mock_inspection_node:main",
             "decision_node = ai_qcell_ros.decision_node:main",
             "reject_action_server = ai_qcell_ros.reject_action_server:main",
             "dashboard_bridge = ai_qcell_ros.dashboard_bridge:main",

@@ -1,0 +1,4 @@
+*.sh text eol=lf
+*.action text eol=lf
+*.msg text eol=lf
+*.launch.py text eol=lf

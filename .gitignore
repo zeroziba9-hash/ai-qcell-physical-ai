@@ -1,10 +1,14 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+*.egg-info/
 .venv/
 venv/
 .env
 data/
 streamlit.*.log
 artifacts/
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
 
