@@ -1,0 +1,18 @@
+{
+  "backbone": "resnet18_imagenet",
+  "layers": "layer2,layer3",
+  "device": "cuda",
+  "train_images": 177,
+  "validation_images": 32,
+  "candidate_patches": 14000,
+  "memory_bank_patches": 900,
+  "feature_dimensions": 384,
+  "threshold": 0.399439,
+  "training_seconds": 5.122,
+  "dataset": "MVTec AD",
+  "category": "bottle",
+  "test_images": 83,
+  "dataset_license": "CC BY-NC-SA 4.0",
+  "method": "PatchCore-style ImageNet feature memory bank",
+  "official_reference": "https://anomalib.readthedocs.io/en/latest/markdown/guides/reference/models/image/patchcore.html"
+}

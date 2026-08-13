@@ -1,0 +1,52 @@
+{
+  "dataset": "MVTec AD",
+  "category": "bottle",
+  "method": "Deep PatchCore-style ResNet18 layer2/layer3 memory bank",
+  "threshold": 0.399439,
+  "image_metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "auroc": 1.0,
+    "confusion_matrix": [
+      [
+        20,
+        0
+      ],
+      [
+        0,
+        63
+      ]
+    ],
+    "sample_count": 83
+  },
+  "pixel_auroc": 0.9782,
+  "per_type": {
+    "broken_large": {
+      "count": 20,
+      "mean_score": 0.739947,
+      "min_score": 0.615111,
+      "max_score": 0.840464
+    },
+    "broken_small": {
+      "count": 22,
+      "mean_score": 0.686981,
+      "min_score": 0.460931,
+      "max_score": 0.802867
+    },
+    "contamination": {
+      "count": 21,
+      "mean_score": 0.652291,
+      "min_score": 0.41366,
+      "max_score": 0.888043
+    },
+    "good": {
+      "count": 20,
+      "mean_score": 0.332217,
+      "min_score": 0.309818,
+      "max_score": 0.378891
+    }
+  },
+  "license": "CC BY-NC-SA 4.0"
+}
