@@ -6,12 +6,15 @@ from PIL import Image
 import streamlit as st
 
 from qcell.deep_patchcore import DeepPatchCore, load_mvtec_bottle
+from qcell.model_registry import ModelRegistry
 from qcell.digital_twin import twin_frame
 from qcell.ros2_pipeline import PipelineInspection, simulate_sort_pipeline
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL_PATH = ROOT / "models" / "deep_patchcore_bottle.pt"
+FALLBACK_MODEL_PATH = ROOT / "models" / "deep_patchcore_bottle.pt"
+REGISTRY_ROOT = ROOT / "artifacts" / "active_learning" / "model_registry"
+MODEL_PATH, MODEL_VERSION = ModelRegistry(REGISTRY_ROOT).resolve_model_path(FALLBACK_MODEL_PATH)
 DATASET_PATH = ROOT / "data" / "mvtec-ad" / "bottle"
 
 st.set_page_config(page_title="AI-QCell Digital Twin", page_icon="🏭", layout="wide")
@@ -27,8 +30,9 @@ st.markdown(
 
 
 @st.cache_resource
-def load_model() -> DeepPatchCore:
-    return DeepPatchCore.load(MODEL_PATH)
+def load_model(path: str, modified_ns: int) -> DeepPatchCore:
+    del modified_ns
+    return DeepPatchCore.load(path)
 
 
 def twin_html(decision: str, product_id: str, score: float) -> str:
@@ -109,7 +113,7 @@ with st.sidebar:
 
 selected = by_type[defect_type][sample_index]
 if run_clicked or "twin_result" not in st.session_state:
-    prediction = load_model().predict(Image.open(selected.path).convert("RGB"))
+    prediction = load_model(str(MODEL_PATH), MODEL_PATH.stat().st_mtime_ns).predict(Image.open(selected.path).convert("RGB"))
     product_id = f"QCELL-{len(st.session_state.get('twin_history', [])) + 1:04d}"
     inspection = PipelineInspection(
         product_id=product_id,

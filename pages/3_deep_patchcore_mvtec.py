@@ -9,10 +9,13 @@ from PIL import Image
 import torch
 
 from qcell.deep_patchcore import DeepPatchCore, load_mvtec_bottle
+from qcell.model_registry import ModelRegistry
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL_PATH = ROOT / "models" / "deep_patchcore_bottle.pt"
+FALLBACK_MODEL_PATH = ROOT / "models" / "deep_patchcore_bottle.pt"
+REGISTRY_ROOT = ROOT / "artifacts" / "active_learning" / "model_registry"
+MODEL_PATH, MODEL_VERSION = ModelRegistry(REGISTRY_ROOT).resolve_model_path(FALLBACK_MODEL_PATH)
 DATASET_PATH = ROOT / "data" / "mvtec-ad" / "bottle"
 REPORT_PATH = ROOT / "docs" / "results" / "deep_patchcore_bottle_report.json"
 VISUAL_PATH = ROOT / "docs" / "images" / "deep_patchcore_bottle_evaluation.png"
@@ -35,8 +38,9 @@ st.markdown(
 
 
 @st.cache_resource
-def load_deep_model() -> DeepPatchCore:
-    return DeepPatchCore.load(MODEL_PATH)
+def load_deep_model(path: str, modified_ns: int) -> DeepPatchCore:
+    del modified_ns
+    return DeepPatchCore.load(path)
 
 
 st.title("🧬 Deep PatchCore · MVTec AD")
@@ -46,7 +50,7 @@ if not MODEL_PATH.exists():
     st.error("Deep PatchCore 모델이 없습니다. `python -m scripts.train_deep_patchcore`를 실행하세요.")
     st.stop()
 
-model = load_deep_model()
+model = load_deep_model(str(MODEL_PATH), MODEL_PATH.stat().st_mtime_ns)
 _, all_samples = load_mvtec_bottle(DATASET_PATH) if DATASET_PATH.exists() else ([], [])
 samples_by_type = {}
 for sample in all_samples:

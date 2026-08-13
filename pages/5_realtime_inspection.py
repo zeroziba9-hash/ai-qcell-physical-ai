@@ -10,6 +10,7 @@ import torch
 from streamlit_webrtc import WebRtcMode, webrtc_streamer
 
 from qcell.deep_patchcore import DeepPatchCore
+from qcell.model_registry import ModelRegistry
 from qcell.realtime import (
     RealtimeInspectionStore,
     RealtimeVideoProcessor,
@@ -20,7 +21,9 @@ from qcell.realtime import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL_PATH = ROOT / "models" / "deep_patchcore_bottle.pt"
+FALLBACK_MODEL_PATH = ROOT / "models" / "deep_patchcore_bottle.pt"
+REGISTRY_ROOT = ROOT / "artifacts" / "active_learning" / "model_registry"
+MODEL_PATH, MODEL_VERSION = ModelRegistry(REGISTRY_ROOT).resolve_model_path(FALLBACK_MODEL_PATH)
 ARTIFACTS = ROOT / "artifacts" / "realtime"
 DEFECTS = ARTIFACTS / "defects"
 
@@ -40,8 +43,9 @@ st.markdown(
 
 
 @st.cache_resource
-def load_model() -> DeepPatchCore:
-    return DeepPatchCore.load(MODEL_PATH)
+def load_model(path: str, modified_ns: int) -> DeepPatchCore:
+    del modified_ns
+    return DeepPatchCore.load(path)
 
 
 def safe_name(name: str) -> str:
@@ -61,7 +65,7 @@ if not MODEL_PATH.exists():
     st.error("Deep PatchCore 모델이 없습니다. 먼저 학습 스크립트를 실행하세요.")
     st.stop()
 
-model = load_model()
+model = load_model(str(MODEL_PATH), MODEL_PATH.stat().st_mtime_ns)
 source_mode = st.radio(
     "입력 소스",
     ["실시간 웹캠", "카메라 스냅샷", "동영상 파일"],

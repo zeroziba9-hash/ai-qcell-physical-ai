@@ -120,6 +120,24 @@ python -m scripts.evaluate_deep_patchcore
 streamlit run app.py
 ```
 
+## 사용자 데이터 능동학습
+
+Streamlit의 `Dataset Studio` → `Training Lab` → `Model Registry` → `Review Queue`가 하나의 재학습 루프를 구성합니다.
+
+- 카메라·업로드 이미지의 정상/불량/미확인 라벨링
+- 정상 학습 데이터와 검증·테스트 데이터의 시드 기반 자동 분할
+- Deep PatchCore 사용자 모델 재학습 및 라벨 검증 데이터 기반 임계값 자동 보정
+- 모델별 F1, AUROC, Precision, Recall, Confusion Matrix, ROC 비교
+- PRODUCTION 모델 배포와 이전 버전 롤백
+- 실시간 REJECT 및 불확실 샘플의 작업자 검토와 Dataset Studio 재유입
+- 배포 버전을 Deep PatchCore, ROS2, 실시간 검사, 디지털 트윈에서 공통 사용
+
+데모 데이터 적재부터 학습·배포까지 한 번에 재현할 수 있습니다.
+
+```powershell
+python -m scripts.train_active_learning --seed-demo --deploy
+```
+
 ## Docker
 
 ```powershell

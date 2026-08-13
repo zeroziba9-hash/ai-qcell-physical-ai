@@ -8,11 +8,14 @@ import streamlit as st
 import torch
 
 from qcell.deep_patchcore import DeepPatchCore, load_mvtec_bottle
+from qcell.model_registry import ModelRegistry
 from qcell.ros2_pipeline import PipelineInspection, PipelineRun, simulate_sort_pipeline
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL_PATH = ROOT / "models" / "deep_patchcore_bottle.pt"
+FALLBACK_MODEL_PATH = ROOT / "models" / "deep_patchcore_bottle.pt"
+REGISTRY_ROOT = ROOT / "artifacts" / "active_learning" / "model_registry"
+MODEL_PATH, MODEL_VERSION = ModelRegistry(REGISTRY_ROOT).resolve_model_path(FALLBACK_MODEL_PATH)
 DATASET_PATH = ROOT / "data" / "mvtec-ad" / "bottle"
 
 st.set_page_config(page_title="AI-QCell ROS2 Sorting", page_icon="🤖", layout="wide")
@@ -37,8 +40,9 @@ st.markdown(
 
 
 @st.cache_resource
-def load_model() -> DeepPatchCore:
-    return DeepPatchCore.load(MODEL_PATH)
+def load_model(path: str, modified_ns: int) -> DeepPatchCore:
+    del modified_ns
+    return DeepPatchCore.load(path)
 
 
 def stage_html(index: int, title: str, state: str, topic: str, css_class: str) -> str:
@@ -112,7 +116,7 @@ with st.sidebar:
 
 if run_clicked:
     with st.spinner("Deep PatchCore 검사와 자동 선별을 실행하는 중입니다..."):
-        prediction = load_model().predict(Image.open(selected.path).convert("RGB"))
+        prediction = load_model(str(MODEL_PATH), MODEL_PATH.stat().st_mtime_ns).predict(Image.open(selected.path).convert("RGB"))
         inspection = PipelineInspection(
             product_id=product_id,
             image_path=str(selected.path),
