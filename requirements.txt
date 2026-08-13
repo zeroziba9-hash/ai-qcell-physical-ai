@@ -1,0 +1,7 @@
+streamlit>=1.37,<2
+pandas>=2.0,<3
+plotly>=5.22,<7
+Pillow>=10,<12
+numpy>=2.0,<3
+pytest>=8,<9
+
