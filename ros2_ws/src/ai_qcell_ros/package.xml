@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>ai_qcell_ros</name>
+  <version>0.1.0</version>
+  <description>ROS2 nodes for AI-QCell inspection and automatic sorting.</description>
+  <maintainer email="portfolio@example.com">AI-QCell</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>ai_qcell_interfaces</depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

@@ -1,0 +1,9 @@
+builtin_interfaces/Time stamp
+string product_id
+string image_path
+string defect_type
+bool is_defect
+float32 anomaly_score
+float32 raw_score
+float32 threshold
+float32 latency_ms

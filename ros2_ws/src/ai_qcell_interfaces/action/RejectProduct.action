@@ -1,0 +1,8 @@
+string product_id
+string reason
+---
+bool success
+string final_state
+---
+float32 progress
+string state
