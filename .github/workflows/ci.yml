@@ -20,6 +20,6 @@ jobs:
           pip install -r requirements.txt -r requirements-video.txt
           pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cpu
       - name: Run unit tests
-        run: pytest -q
+        run: python -m pytest -q
       - name: Compile Python sources
         run: python -m compileall -q qcell pages scripts ros2_ws/src
