@@ -1,0 +1,49 @@
+name: ONNX Edge Export
+
+on:
+  push:
+    branches: [main, "agent/**"]
+    paths:
+      - "qcell/edge_runtime.py"
+      - "qcell/deep_patchcore.py"
+      - "qcell/model_registry.py"
+      - "scripts/export_edge_model.py"
+      - "scripts/verify_edge_export.py"
+      - "requirements-edge.txt"
+      - "models/deep_patchcore_bottle.pt"
+      - ".github/workflows/edge-runtime.yml"
+  pull_request:
+    paths:
+      - "qcell/edge_runtime.py"
+      - "scripts/export_edge_model.py"
+      - "scripts/verify_edge_export.py"
+      - ".github/workflows/edge-runtime.yml"
+
+jobs:
+  export-and-verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+      - name: Install CPU export dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install "onnx>=1.17,<2" "onnxscript>=0.2,<1" "onnxruntime>=1.21,<1.27"
+      - name: Export complete Deep PatchCore graph
+        run: python -m scripts.export_edge_model
+      - name: Verify PyTorch and ONNX equivalence
+        run: python -m scripts.verify_edge_export --provider cpu --max-score-error 0.001
+      - name: Publish ONNX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-qcell-deep-patchcore-onnx
+          path: |
+            artifacts/edge_runtime/*.onnx
+            artifacts/edge_runtime/*.json
+          if-no-files-found: error
+          retention-days: 30

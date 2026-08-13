@@ -1,0 +1,127 @@
+{
+  "environment": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.10.11",
+    "packages": {
+      "onnx": true,
+      "onnxscript": true,
+      "onnxruntime": true,
+      "tensorrt": true
+    },
+    "versions": {
+      "torch": "2.7.0+cu128",
+      "onnxruntime": "1.23.2",
+      "onnx": "1.22.0",
+      "tensorrt": "11.2.1.2"
+    },
+    "providers": [
+      "TensorrtExecutionProvider",
+      "CUDAExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "cuda_available": true,
+    "cuda_version": "12.8",
+    "gpu": "NVIDIA GeForce RTX 4080 SUPER"
+  },
+  "benchmarks": [
+    {
+      "backend": "PyTorch",
+      "provider": "cuda",
+      "sample_count": 4,
+      "warmup_runs": 8,
+      "measured_runs": 30,
+      "mean_ms": 8.294,
+      "median_ms": 8.359,
+      "p95_ms": 9.299,
+      "min_ms": 6.994,
+      "max_ms": 9.664,
+      "fps": 119.63,
+      "score_mae": 0.0,
+      "score_max_error": 0.0,
+      "decision_agreement": 1.0,
+      "scores": [
+        0.388882,
+        0.776397,
+        0.507239,
+        0.729234
+      ]
+    },
+    {
+      "backend": "ONNX Runtime",
+      "provider": "CUDAExecutionProvider",
+      "sample_count": 4,
+      "warmup_runs": 8,
+      "measured_runs": 30,
+      "mean_ms": 5.966,
+      "median_ms": 5.895,
+      "p95_ms": 6.617,
+      "min_ms": 5.344,
+      "max_ms": 6.7,
+      "fps": 169.62,
+      "score_mae": 1.975e-05,
+      "score_max_error": 5.4e-05,
+      "decision_agreement": 1.0,
+      "scores": [
+        0.388936,
+        0.776403,
+        0.507252,
+        0.729228
+      ]
+    },
+    {
+      "backend": "ONNX Runtime",
+      "provider": "CPUExecutionProvider",
+      "sample_count": 4,
+      "warmup_runs": 8,
+      "measured_runs": 30,
+      "mean_ms": 9.41,
+      "median_ms": 9.575,
+      "p95_ms": 10.147,
+      "min_ms": 8.382,
+      "max_ms": 10.189,
+      "fps": 104.44,
+      "score_mae": 2.375e-05,
+      "score_max_error": 4e-05,
+      "decision_agreement": 1.0,
+      "scores": [
+        0.388872,
+        0.776373,
+        0.507199,
+        0.729255
+      ]
+    },
+    {
+      "backend": "TensorRT",
+      "provider": "TensorRT 11 Native",
+      "sample_count": 4,
+      "warmup_runs": 8,
+      "measured_runs": 30,
+      "mean_ms": 5.288,
+      "median_ms": 5.245,
+      "p95_ms": 5.608,
+      "min_ms": 4.965,
+      "max_ms": 5.84,
+      "fps": 190.65,
+      "score_mae": 4.9e-05,
+      "score_max_error": 8.8e-05,
+      "decision_agreement": 1.0,
+      "scores": [
+        0.388794,
+        0.776356,
+        0.507187,
+        0.729219
+      ]
+    }
+  ],
+  "model_version": "custom-20260813-224200",
+  "model_path": "artifacts/active_learning/model_registry/versions/custom-20260813-224200/model.pt",
+  "onnx_path": "artifacts/edge_runtime/deep_patchcore_custom-20260813-224200.onnx",
+  "engine_path": "artifacts/edge_runtime/deep_patchcore_custom-20260813-224200.engine",
+  "sample_types": [
+    "good",
+    "broken_large",
+    "broken_small",
+    "contamination"
+  ],
+  "measurement_scope": "end-to-end image preparation, inference and overlay"
+}

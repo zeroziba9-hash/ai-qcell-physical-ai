@@ -1,0 +1,2 @@
+# NVIDIA TensorRT 11 CUDA 12 Python builder/runtime (optional, large download)
+tensorrt-cu12>=10,<12

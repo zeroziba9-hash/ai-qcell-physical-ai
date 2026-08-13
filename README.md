@@ -3,6 +3,7 @@
 [![Python CI](https://github.com/zeroziba9-hash/ai-qcell-physical-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/zeroziba9-hash/ai-qcell-physical-ai/actions/workflows/ci.yml)
 [![ROS2 Jazzy Build](https://github.com/zeroziba9-hash/ai-qcell-physical-ai/actions/workflows/ros2.yml/badge.svg)](https://github.com/zeroziba9-hash/ai-qcell-physical-ai/actions/workflows/ros2.yml)
 [![Docker Build](https://github.com/zeroziba9-hash/ai-qcell-physical-ai/actions/workflows/docker.yml/badge.svg)](https://github.com/zeroziba9-hash/ai-qcell-physical-ai/actions/workflows/docker.yml)
+[![ONNX Edge Export](https://github.com/zeroziba9-hash/ai-qcell-physical-ai/actions/workflows/edge-runtime.yml/badge.svg)](https://github.com/zeroziba9-hash/ai-qcell-physical-ai/actions/workflows/edge-runtime.yml)
 
 [![AI-QCell 42초 포트폴리오 데모](docs/images/demo_video_cover.png)](docs/videos/ai_qcell_portfolio_demo.mp4)
 
@@ -136,6 +137,28 @@ Streamlit의 `Dataset Studio` → `Training Lab` → `Model Registry` → `Revie
 
 ```powershell
 python -m scripts.train_active_learning --seed-demo --deploy
+```
+
+## ONNX · TensorRT 엣지 최적화
+
+![AI-QCell Edge Runtime Benchmark](docs/images/edge_runtime_benchmark.png)
+
+PRODUCTION Deep PatchCore의 전처리, ResNet18 특징 추출, 메모리 뱅크 최근접 거리, anomaly map을 하나의 ONNX 그래프로 내보내고 TensorRT 네이티브 엔진으로 빌드합니다.
+
+| Runtime | Provider | p50 | p95 | 처리량 | 판정 일치율 |
+|---|---|---:|---:|---:|---:|
+| PyTorch | CUDA | 8.36 ms | 9.30 ms | 119.63 FPS | 100% |
+| ONNX Runtime | CUDA | 5.90 ms | 6.62 ms | 169.62 FPS | 100% |
+| ONNX Runtime | CPU | 9.58 ms | 10.15 ms | 104.44 FPS | 100% |
+| TensorRT 11 | Native CUDA | 5.25 ms | 5.61 ms | 190.65 FPS | 100% |
+
+> RTX 4080 SUPER에서 이미지 준비, 추론, 히트맵 렌더링을 포함해 30회 측정한 포트폴리오 환경 결과입니다. TensorRT 엔진은 대상 GPU에서 다시 빌드해야 합니다.
+
+```powershell
+pip install -r requirements-edge.txt
+pip install -r requirements-tensorrt.txt
+python -m scripts.export_edge_model --build-tensorrt
+python -m scripts.benchmark_edge_runtime --include-cpu
 ```
 
 ## Docker
