@@ -1,0 +1,4 @@
+opencv-python-headless>=4.11,<5
+streamlit-webrtc>=0.64,<1
+imageio>=2.37,<3
+imageio-ffmpeg>=0.6,<1
