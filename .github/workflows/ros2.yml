@@ -1,0 +1,30 @@
+name: ROS2 Jazzy Build
+
+on:
+  push:
+    branches: [main, "agent/**"]
+    paths: ["ros2_ws/**", ".github/workflows/ros2.yml"]
+  pull_request:
+    paths: ["ros2_ws/**", ".github/workflows/ros2.yml"]
+
+jobs:
+  colcon:
+    runs-on: ubuntu-24.04
+    container: ros:jazzy-ros-base
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install colcon
+        run: apt-get update && apt-get install -y python3-colcon-common-extensions
+      - name: Build ROS2 workspace
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          cd ros2_ws
+          colcon build --symlink-install --event-handlers console_direct+
+      - name: Verify ROS2 packages
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source ros2_ws/install/setup.bash
+          ros2 interface show ai_qcell_interfaces/msg/InspectionResult
+          ros2 interface show ai_qcell_interfaces/action/RejectProduct

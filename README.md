@@ -1,5 +1,11 @@
 # AI-QCell
 
+[![Python CI](https://github.com/zeroziba9-hash/ai-qcell-physical-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/zeroziba9-hash/ai-qcell-physical-ai/actions/workflows/ci.yml)
+[![ROS2 Jazzy Build](https://github.com/zeroziba9-hash/ai-qcell-physical-ai/actions/workflows/ros2.yml/badge.svg)](https://github.com/zeroziba9-hash/ai-qcell-physical-ai/actions/workflows/ros2.yml)
+[![Docker Build](https://github.com/zeroziba9-hash/ai-qcell-physical-ai/actions/workflows/docker.yml/badge.svg)](https://github.com/zeroziba9-hash/ai-qcell-physical-ai/actions/workflows/docker.yml)
+
+[![AI-QCell 42초 포트폴리오 데모](docs/images/demo_video_cover.png)](docs/videos/ai_qcell_portfolio_demo.mp4)
+
 Physical AI 기반 스마트팩토리 품질검사 셀 포트폴리오 프로젝트입니다.
 
 AI-QCell은 가상 생산라인, 기준 이미지 비교, 정상 제품만 학습하는 경량 모델과 MVTec AD 실제 산업 이미지용 Deep PatchCore를 제공합니다. 결함 히트맵, REJECT 명령, 생산 KPI와 모델 평가 결과를 한 대시보드에서 확인할 수 있습니다.
@@ -71,9 +77,34 @@ Deep PatchCore의 판정을 실제 생산 셀 동작으로 연결하는 ROS2 패
 | `reject_action_server` | `/qcell/reject_product` Action | 선별기 진행률 25/50/75/100% 피드백 |
 | `dashboard_bridge` | Topic Subscriber | 검사·선별 이벤트와 KPI 연결 |
 
-현재 PC에는 ROS2가 설치되어 있지 않으므로 Streamlit의 `ROS2 Sorting Pipeline` 페이지는 같은
-메시지·토픽·액션 계약을 재현하는 Mock Runtime으로 즉시 시연됩니다. 실제 ROS2 패키지는
-[`ros2_ws`](ros2_ws/README.md)에 있으며 ROS2 환경에서 `colcon build` 후 실행할 수 있습니다.
+Streamlit의 `ROS2 Sorting Pipeline` 페이지는 같은 메시지·토픽·액션 계약을 재현하는 Mock Runtime으로
+즉시 시연됩니다. 실제 ROS2 패키지는 [`ros2_ws`](ros2_ws/README.md)에 있으며 Ubuntu 24.04 WSL2의
+ROS2 Jazzy에서 `colcon build`와 런타임 검증을 완료했습니다. CUDA Deep PatchCore 노드가 RTX 4080
+SUPER에서 실제 anomaly score를 발행하고 Reject Action 결과까지 전달하는 것을 확인했습니다.
+
+## 실시간 카메라·영상 검사
+
+Streamlit의 `Realtime Inspection` 페이지에서 다음 입력을 지원합니다.
+
+- 브라우저 WebRTC 웹캠 실시간 추론
+- `st.camera_input` 카메라 스냅샷
+- MP4/MOV/AVI/MKV 영상 업로드 및 히트맵 MP4 생성
+- 불량 프레임 자동 저장과 검사 이력 CSV 다운로드
+- 검사 프레임 수, REJECT 비율, 평균 GPU 지연시간 KPI
+
+## 액추에이터 디지털 트윈
+
+`Actuator Digital Twin` 페이지는 컨베이어 위 제품, 검사 카메라, 선별 게이트와 REJECT BIN을 7초 애니메이션으로
+재현합니다. Deep PatchCore 판정과 ROS2 Action의 Goal → Feedback → Result 상태를 동일 제품 ID로 연결합니다.
+
+## 배포와 품질 자동화
+
+- `Dockerfile`과 `compose.yaml`: Streamlit 애플리케이션 컨테이너 실행
+- `Python CI`: 전체 pytest 및 Python compile 검증
+- `ROS2 Jazzy Build`: 인터페이스와 노드 패키지 colcon build
+- `Docker Build`: CPU 추론용 프로덕션 이미지 빌드 검증
+- 42초 MP4 포트폴리오 데모: [`docs/videos/ai_qcell_portfolio_demo.mp4`](docs/videos/ai_qcell_portfolio_demo.mp4)
+
 
 ## 실행
 
@@ -82,10 +113,25 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 pip install -r requirements-ml.txt --index-url https://download.pytorch.org/whl/cu128
+pip install -r requirements-video.txt
 python -m scripts.download_mvtec_bottle
 python -m scripts.train_deep_patchcore
 python -m scripts.evaluate_deep_patchcore
 streamlit run app.py
+```
+
+## Docker
+
+```powershell
+docker compose up --build
+```
+
+## ROS2 Jazzy on Ubuntu 24.04 WSL2
+
+```powershell
+wsl -d Ubuntu-24.04 -u root -- bash /mnt/c/Users/user/ai-qcell/scripts/install_ros2_wsl.sh
+wsl -d Ubuntu-24.04 -- bash /mnt/c/Users/user/ai-qcell/scripts/install_ros2_deep_env.sh
+powershell -ExecutionPolicy Bypass -File scripts/run_ros2_wsl.ps1 -Mode deep
 ```
 
 ## 테스트
@@ -99,5 +145,5 @@ pytest
 - Phase 1: 가상 생산라인과 품질 대시보드
 - Phase 2: MVTec AD bottle + Deep PatchCore 완료
 - Phase 3: ROS2 Topic/Action 자동 선별 파이프라인 완료
-- Phase 4: 카메라·센서 입력 및 디지털 트윈
+- Phase 4: 실시간 카메라·영상 검사 및 액추에이터 디지털 트윈 완료
 
