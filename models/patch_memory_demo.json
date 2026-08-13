@@ -1,0 +1,16 @@
+{
+  "model": "PatchMemoryDetector",
+  "training_type": "unsupervised_normal_only",
+  "training_images": 40,
+  "image_size": [
+    256,
+    256
+  ],
+  "grid_size": 16,
+  "patches_per_image": 256,
+  "feature_dimensions": 8,
+  "patch_threshold": 0.096238,
+  "image_threshold": 0.108805,
+  "training_seconds": 1.007,
+  "note": "Synthetic aligned-product baseline; replace with MVTec AD + deep PatchCore."
+}

@@ -1,0 +1,53 @@
+{
+  "evaluation": "held_out_synthetic_products",
+  "threshold": 0.108805,
+  "metrics": {
+    "accuracy": 0.9821,
+    "precision": 0.973,
+    "recall": 1.0,
+    "f1": 0.9863,
+    "auroc": 1.0,
+    "confusion_matrix": [
+      [
+        19,
+        1
+      ],
+      [
+        0,
+        36
+      ]
+    ],
+    "sample_count": 56
+  },
+  "per_type": {
+    "normal": {
+      "count": 20,
+      "mean_score": 0.063,
+      "min_score": 0.029,
+      "max_score": 0.366
+    },
+    "scratch": {
+      "count": 12,
+      "mean_score": 8.07,
+      "min_score": 7.6846,
+      "max_score": 8.2958
+    },
+    "crack": {
+      "count": 12,
+      "mean_score": 4.8822,
+      "min_score": 4.6807,
+      "max_score": 5.0411
+    },
+    "missing_part": {
+      "count": 12,
+      "mean_score": 6.6635,
+      "min_score": 6.5885,
+      "max_score": 6.7623
+    }
+  },
+  "limitations": [
+    "Synthetic aligned-product data only",
+    "Not comparable to MVTec AD benchmark scores",
+    "Deep pretrained features are not used yet"
+  ]
+}
