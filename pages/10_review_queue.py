@@ -8,6 +8,7 @@ from PIL import Image
 import streamlit as st
 
 from qcell.ui import inject_global_css, page_header, workflow_strip
+from qcell.auth import REVIEW_CASES, session_principal
 
 from qcell.active_learning import ensure_baseline_registered
 from qcell.dataset_studio import DatasetStudio
@@ -28,6 +29,8 @@ BASELINE_REPORT = ROOT / "docs" / "results" / "deep_patchcore_bottle_report.json
 
 st.set_page_config(page_title="AI-QCell Review Queue", page_icon="🔎", layout="wide")
 inject_global_css()
+principal = session_principal(st.session_state)
+can_review = principal.can(REVIEW_CASES)
 st.markdown(
     """
     <style>
@@ -98,7 +101,12 @@ with add_tab:
             m3.metric("Threshold", f"{prediction.threshold:.4f}")
             if uncertain:
                 st.warning("임계값과 가까운 불확실 샘플입니다. 우선 검토를 권장합니다.")
-            if st.button("Review Queue에 추가", type="primary", width="stretch"):
+            if st.button(
+                "Review Queue에 추가",
+                type="primary",
+                disabled=not can_review,
+                width="stretch",
+            ):
                 case = queue.add_case(
                     image,
                     predicted_label="defect" if prediction.is_defect else "normal",
@@ -128,7 +136,7 @@ with add_tab:
         st.metric("저장된 REJECT 프레임", realtime_count)
         if st.button(
             "실시간 REJECT 동기화",
-            disabled=not REALTIME_REJECTS.exists(),
+            disabled=not REALTIME_REJECTS.exists() or not can_review,
             width="stretch",
         ):
             added = queue.import_realtime_rejects(REALTIME_REJECTS)
@@ -168,7 +176,12 @@ with review_tab:
             )
             st.write(f"AI 예측: **{case.predicted_label.upper()}**")
             st.write(f"Raw score: **{case.raw_score:.4f}** / threshold **{case.threshold:.4f}**")
-            if st.button("판정 확정 및 Dataset Studio 전송", type="primary", width="stretch"):
+            if st.button(
+                "판정 확정 및 Dataset Studio 전송",
+                type="primary",
+                disabled=not can_review,
+                width="stretch",
+            ):
                 resolved, record = queue.resolve(
                     case.case_id,
                     actual_label=actual_label,
@@ -177,6 +190,8 @@ with review_tab:
                 )
                 st.success(f"{resolved.status.upper()} · 데이터셋 레코드 {record.record_id} 생성")
                 st.rerun()
+            if not can_review:
+                st.info("판정 확정은 Quality Manager 또는 Admin 로그인이 필요합니다.")
 
 with history_tab:
     resolved_cases = [case for case in all_cases if case.status != "pending"]

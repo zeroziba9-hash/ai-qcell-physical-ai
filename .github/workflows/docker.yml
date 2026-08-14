@@ -16,6 +16,29 @@ jobs:
         with:
           context: .
           push: false
+          load: true
           tags: ai-qcell:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Start application container
+        run: docker run --detach --name ai-qcell-ci --publish 8501:8501 ai-qcell:ci
+      - name: Wait for healthy application
+        shell: bash
+        run: |
+          for attempt in {1..30}; do
+            status="$(docker inspect --format='{{.State.Health.Status}}' ai-qcell-ci)"
+            if [ "$status" = "healthy" ]; then
+              curl --fail --silent http://127.0.0.1:8501/_stcore/health
+              exit 0
+            fi
+            if [ "$status" = "unhealthy" ]; then
+              docker logs ai-qcell-ci
+              exit 1
+            fi
+            sleep 5
+          done
+          docker logs ai-qcell-ci
+          exit 1
+      - name: Show container logs
+        if: always()
+        run: docker logs ai-qcell-ci

@@ -7,6 +7,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
+from qcell.auth import MANAGE_CAPA, RUN_INSPECTION, session_principal
 from qcell.quality_analytics import (
     QualityReportStore,
     build_quality_report,
@@ -14,6 +15,7 @@ from qcell.quality_analytics import (
     quality_events_to_csv,
     quality_report_to_json,
 )
+from qcell.traceability import TraceabilityStore
 from qcell.ui import (
     inject_global_css,
     page_header,
@@ -25,10 +27,14 @@ from qcell.ui import (
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT_ROOT = ROOT / "artifacts" / "quality_reports"
+TRACE_DATABASE = ROOT / "artifacts" / "traceability" / "qcell.db"
 
 
 st.set_page_config(page_title="품질 분석 리포트 · AI-QCell", page_icon="📈", layout="wide")
 inject_global_css()
+principal = session_principal(st.session_state)
+can_generate = principal.can(RUN_INSPECTION)
+can_manage_capa = principal.can(MANAGE_CAPA)
 st.markdown(
     """
     <style>
@@ -78,7 +84,12 @@ with st.sidebar:
         disabled=not inject_drift,
     ) / 100.0
     seed = int(st.number_input("재현 시드", min_value=1, max_value=9999, value=23))
-    if st.button("새 교대 데이터 생성", type="primary", width="stretch"):
+    if st.button(
+        "새 교대 데이터 생성",
+        type="primary",
+        disabled=not can_generate,
+        width="stretch",
+    ):
         st.session_state.quality_demo_events = generate_demo_shift(
             sample_count,
             baseline_defect_rate=baseline_rate,
@@ -87,6 +98,8 @@ with st.sidebar:
             seed=seed,
         )
         st.rerun()
+    if not can_generate:
+        st.caption("데이터 재생성은 Operator 이상 로그인이 필요합니다.")
 
     st.markdown("### 판정 기준")
     subgroup_size = st.select_slider("SPC 소그룹 크기", options=[10, 20, 30, 40], value=20)
@@ -318,12 +331,18 @@ section_header(
     "현재 분석 조건을 JSON 스냅샷으로 보존하거나 원시 검사 이력과 함께 다운로드합니다.",
     code="AUDIT TRAIL / 06",
 )
-store = QualityReportStore(REPORT_ROOT)
+report_store = QualityReportStore(REPORT_ROOT)
+trace_store = TraceabilityStore(TRACE_DATABASE)
 report_name = st.text_input("리포트 이름", value="2026-08-14 A조 교대 품질 리포트")
-action_a, action_b, action_c = st.columns([1, 1, 1], gap="medium")
+action_a, action_b, action_c, action_d = st.columns(4, gap="medium")
 with action_a:
-    if st.button("리포트 스냅샷 저장", type="primary", width="stretch"):
-        snapshot = store.save(report, name=report_name)
+    if st.button(
+        "리포트 스냅샷 저장",
+        type="primary",
+        disabled=not can_manage_capa,
+        width="stretch",
+    ):
+        snapshot = report_store.save(report, name=report_name)
         st.success(f"저장 완료 · {snapshot['snapshot_id']}")
 with action_b:
     st.download_button(
@@ -341,8 +360,33 @@ with action_c:
         mime="application/json",
         width="stretch",
     )
+with action_d:
+    if st.button(
+        "활성 알람 → CAPA",
+        disabled=not alerts or not can_manage_capa,
+        width="stretch",
+    ):
+        created_count = 0
+        lot_context = ",".join(selected_lots)
+        for alert in alerts:
+            _, created = trace_store.create_capa(
+                alert_code=str(alert["code"]),
+                severity=str(alert["severity"]),
+                title=str(alert["title"]),
+                description=str(alert["detail"]),
+                actor=principal.username,
+                lot_id=lot_context,
+                owner=principal.username,
+                dedupe_key=(
+                    f"quality:{source_name}:{lot_context}:{alert['code']}"
+                ),
+            )
+            created_count += int(created)
+        st.success(f"신규 CAPA {created_count}건 생성 · 추적성 센터에서 조치하세요.")
+if not can_manage_capa:
+    st.caption("리포트 저장과 CAPA 전환은 Quality Manager 또는 Admin 로그인이 필요합니다.")
 
-snapshots = store.list()
+snapshots = report_store.list()
 if snapshots:
     history_rows = []
     for snapshot in snapshots[:20]:

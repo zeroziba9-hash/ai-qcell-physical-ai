@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 from html import escape
-import inspect
-from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
 import streamlit as st
 
+from qcell.auth import session_principal
 
 GLOBAL_CSS = r"""
 <style>
@@ -181,6 +180,16 @@ section[data-testid="stSidebar"] [data-testid="stPageLink"] a[aria-current="page
     font: 600 0.58rem/1.4 Consolas, monospace;
 }
 .qcell-side-foot b { color: #8fa095; font-weight: 700; }
+.qcell-side-identity {
+    margin: 0.7rem 0.5rem 0;
+    padding: 0.72rem 0.8rem;
+    border: 1px solid var(--q-line-soft);
+    border-radius: 8px;
+    background: rgba(125,145,168,.035);
+}
+.qcell-side-identity span { display:block; color:#516072; font:650 .55rem/1.2 Consolas,monospace; letter-spacing:.1em; }
+.qcell-side-identity strong { display:block; margin-top:.28rem; color:#bac7d2; font-size:.69rem; }
+.qcell-side-identity b { color:var(--q-accent); font:700 .56rem/1 Consolas,monospace; }
 
 h1, h2, h3, h4 { color: var(--q-text); letter-spacing: -0.025em; }
 h3 { font-size: 1rem; }
@@ -556,10 +565,17 @@ NAV_GROUPS: Sequence[tuple[str, Sequence[tuple[str, str]]]] = (
             ("pages/10_review_queue.py", "11  Review Queue"),
         ),
     ),
+    (
+        "GOVERNANCE",
+        (
+            ("pages/14_traceability.py", "14  제품 추적성·CAPA"),
+            ("pages/13_access_control.py", "13  접근 제어"),
+        ),
+    ),
 )
 
 
-def _render_sidebar_navigation(active_script: str) -> None:
+def _render_sidebar_navigation() -> None:
     st.sidebar.markdown(
         """
         <div class="qcell-side-brand">
@@ -571,24 +587,27 @@ def _render_sidebar_navigation(active_script: str) -> None:
         unsafe_allow_html=True,
     )
     for group, links in NAV_GROUPS:
-        rendered_links = []
-        for page, label in links:
-            page_name = page.rsplit("/", 1)[-1]
-            stem = page_name.removesuffix(".py")
-            href = "/" if stem == "app" else f'/{stem.split("_", 1)[-1]}'
-            index, title = label.split("  ", 1)
-            active_class = " is-active" if page_name == active_script else ""
-            aria_current = ' aria-current="page"' if active_class else ""
-            rendered_links.append(
-                f'<a class="qcell-nav-link{active_class}" href="{escape(href, quote=True)}" '
-                f'target="_self"{aria_current}><span class="qcell-nav-index">{escape(index)}</span>'
-                f'<span class="qcell-nav-title">{escape(title)}</span></a>'
-            )
         st.sidebar.markdown(
-            f'<div class="qcell-nav-group">{escape(group)}</div>{"".join(rendered_links)}',
+            f'<div class="qcell-nav-group">{escape(group)}</div>',
             unsafe_allow_html=True,
         )
+        for page, label in links:
+            try:
+                st.sidebar.page_link(page, label=label)
+            except KeyError:
+                # AppTest executes a page in isolation and may omit multipage URL metadata.
+                page_name = page.rsplit("/", 1)[-1]
+                stem = page_name.removesuffix(".py")
+                href = "/" if stem == "app" else f'/{stem.split("_", 1)[-1]}'
+                st.sidebar.markdown(
+                    f'<a class="qcell-nav-link" href="{escape(href, quote=True)}" '
+                    f'target="_self">{escape(label)}</a>',
+                    unsafe_allow_html=True,
+                )
+    principal = session_principal(st.session_state)
     st.sidebar.markdown(
+        f'<div class="qcell-side-identity"><span>ACTIVE IDENTITY</span><strong>{escape(principal.display_name)}</strong>'
+        f'<b>{escape(principal.role.upper())}</b></div>'
         '<div class="qcell-side-foot"><span>EDGE NODE / 01</span><b>CONNECTED</b></div>',
         unsafe_allow_html=True,
     )
@@ -598,8 +617,7 @@ def inject_global_css() -> None:
     """Apply the visual system early and render the grouped product navigation."""
 
     st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
-    caller = Path(inspect.stack()[1].filename).name
-    _render_sidebar_navigation(caller)
+    _render_sidebar_navigation()
 
 
 def page_header(eyebrow: str, title: str, description: str, *, status: str = "SYSTEM ONLINE") -> None:
