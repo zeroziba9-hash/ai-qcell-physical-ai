@@ -6,6 +6,8 @@ import re
 import pandas as pd
 from PIL import Image
 import streamlit as st
+
+from qcell.ui import inject_global_css, page_header, workflow_strip
 import torch
 from streamlit_webrtc import WebRtcMode, webrtc_streamer
 
@@ -58,8 +60,14 @@ if "realtime_store" not in st.session_state:
 
 store: RealtimeInspectionStore = st.session_state.realtime_store
 
-st.title("🎥 실시간 Deep PatchCore 검사")
-st.caption("브라우저 웹캠, 카메라 스냅샷 또는 동영상 파일을 GPU로 검사하고 불량 프레임과 CSV 이력을 저장합니다.")
+inject_global_css()
+page_header(
+    "LIVE VISION · STREAM INFERENCE",
+    "실시간 Deep PatchCore 검사",
+    "웹캠, 카메라 스냅샷과 동영상을 프레임 단위로 검사하고 불량 이력을 저장합니다.",
+    status="CAPTURE PIPELINE READY",
+)
+workflow_strip(["Capture", "Frame inference", "Reject archive", "CSV history"])
 
 if not MODEL_PATH.exists():
     st.error("Deep PatchCore 모델이 없습니다. 먼저 학습 스크립트를 실행하세요.")

@@ -7,6 +7,8 @@ import pandas as pd
 from PIL import Image
 import streamlit as st
 
+from qcell.ui import inject_global_css, page_header, workflow_strip
+
 from qcell.active_learning import ensure_baseline_registered
 from qcell.dataset_studio import DatasetStudio
 from qcell.deep_patchcore import DeepPatchCore
@@ -55,8 +57,14 @@ pending = queue.cases("pending")
 confirmed = queue.cases("confirmed")
 corrected = queue.cases("corrected")
 
-st.title("🔎 Review Queue")
-st.caption("애매한 판정과 실시간 REJECT를 작업자가 확인하고 정답을 Dataset Studio로 되돌립니다.")
+inject_global_css()
+page_header(
+    "HUMAN-IN-THE-LOOP · REVIEW QUEUE",
+    "품질 판정 Review Queue",
+    "애매한 판정과 실시간 REJECT를 작업자가 확인하고 정답을 Dataset Studio로 되돌립니다.",
+    status="REVIEW STATION READY",
+)
+workflow_strip(["AI 판정 큐", "작업자 검수", "정답 확정", "Dataset 반환"])
 
 c1, c2, c3, c4, c5 = st.columns(5)
 c1.metric("검토 대기", len(pending))

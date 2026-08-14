@@ -7,6 +7,8 @@ import pandas as pd
 from PIL import Image
 import streamlit as st
 
+from qcell.ui import inject_global_css, page_header, workflow_strip
+
 from qcell.dataset_studio import DatasetStudio
 
 
@@ -30,8 +32,14 @@ st.markdown(
 dataset = DatasetStudio(DATASET_ROOT)
 stats = dataset.statistics()
 
-st.title("📸 Dataset Studio")
-st.caption("현장 이미지를 수집하고 정상·불량 라벨과 학습/검증/테스트 분할을 관리합니다.")
+inject_global_css()
+page_header(
+    "DATA OPERATIONS · DATASET STUDIO",
+    "현장 데이터셋 스튜디오",
+    "현장 이미지를 수집하고 정상·불량 라벨과 학습·검증·테스트 분할을 관리합니다.",
+    status="DATA PIPELINE READY",
+)
+workflow_strip(["이미지 수집", "품질 라벨", "재현 가능 분할", "학습 준비"])
 st.markdown(
     '<div class="flow">수집 → 라벨링 → 데이터 분할 → Deep PatchCore 학습 → 검토 데이터 재유입</div>',
     unsafe_allow_html=True,

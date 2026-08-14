@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 
 import streamlit as st
+
+from qcell.ui import inject_global_css, page_header, workflow_strip
 from PIL import Image
 
 from qcell.patch_memory import PatchMemoryDetector
@@ -38,8 +40,14 @@ def load_model() -> PatchMemoryDetector:
     return PatchMemoryDetector.load(MODEL_PATH)
 
 
-st.title("🧠 학습형 Patch Memory 검사")
-st.caption("정상 제품만 학습한 비지도 모델이 기준 이미지 없이 결함을 탐지합니다.")
+inject_global_css()
+page_header(
+    "UNSUPERVISED AI · PATCH MEMORY",
+    "학습형 Patch Memory 검사",
+    "정상 제품만 학습한 비지도 모델이 기준 이미지 없이 결함을 탐지합니다.",
+    status="MEMORY BANK READY",
+)
+workflow_strip(["정상 학습", "패치 메모리", "이상 점수", "PASS / REJECT"])
 
 if not MODEL_PATH.exists():
     st.error("학습 모델이 없습니다. `python -m scripts.train_patch_memory`를 실행하세요.")

@@ -11,6 +11,13 @@ Physical AI 기반 스마트팩토리 품질검사 셀 포트폴리오 프로젝
 
 AI-QCell은 가상 생산라인, 기준 이미지 비교, 정상 제품만 학습하는 경량 모델과 MVTec AD 실제 산업 이미지용 Deep PatchCore를 제공합니다. 결함 히트맵, REJECT 명령, 생산 KPI와 모델 평가 결과를 한 대시보드에서 확인할 수 있습니다.
 
+## 통합 운영 대시보드
+
+![AI-QCell 통합 운영 대시보드](docs/images/ui_dashboard_redesign.png)
+
+산업용 관제 화면을 기준으로 전체 Streamlit UI를 통일했습니다. 공정 상태, 검사 KPI, Physical AI 폐루프와
+11개 운영 모듈을 한 화면에서 확인하고 바로 이동할 수 있으며 데스크톱·태블릿·모바일 레이아웃을 지원합니다.
+
 ## 시각화 결과
 
 ![AI-QCell 비전 불량검사 결과](docs/images/qcell_vision_demo.png)

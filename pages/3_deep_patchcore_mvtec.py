@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 
 import streamlit as st
+
+from qcell.ui import inject_global_css, page_header, workflow_strip
 from PIL import Image
 import torch
 
@@ -43,8 +45,14 @@ def load_deep_model(path: str, modified_ns: int) -> DeepPatchCore:
     return DeepPatchCore.load(path)
 
 
-st.title("🧬 Deep PatchCore · MVTec AD")
-st.caption("ImageNet ResNet18 중간 특징과 정상 패치 메모리 뱅크로 실제 산업 결함을 탐지합니다.")
+inject_global_css()
+page_header(
+    "PRODUCTION VISION · MVTec AD",
+    "Deep PatchCore 산업 결함검사",
+    "ImageNet ResNet18 중간 특징과 정상 패치 메모리 뱅크로 실제 산업 결함을 탐지합니다.",
+    status="PRODUCTION MODEL",
+)
+workflow_strip(["Feature extract", "Memory bank", "Nearest patch", "Anomaly heatmap"])
 
 if not MODEL_PATH.exists():
     st.error("Deep PatchCore 모델이 없습니다. `python -m scripts.train_deep_patchcore`를 실행하세요.")

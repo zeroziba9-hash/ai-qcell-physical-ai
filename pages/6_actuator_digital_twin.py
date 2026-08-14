@@ -5,6 +5,8 @@ from pathlib import Path
 from PIL import Image
 import streamlit as st
 
+from qcell.ui import inject_global_css, page_header, workflow_strip
+
 from qcell.deep_patchcore import DeepPatchCore, load_mvtec_bottle
 from qcell.model_registry import ModelRegistry
 from qcell.digital_twin import twin_frame
@@ -92,8 +94,14 @@ def twin_html(decision: str, product_id: str, score: float) -> str:
     """
 
 
-st.title("🏭 자동 선별 액추에이터 디지털 트윈")
-st.caption("Deep PatchCore 판정을 컨베이어, 선별 게이트, ROS2 Action 상태와 동기화한 가상 생산 셀입니다.")
+inject_global_css()
+page_header(
+    "PHYSICAL AI · ACTUATOR TWIN",
+    "자동 선별 액추에이터 디지털 트윈",
+    "Deep PatchCore 판정을 컨베이어, 선별 게이트와 ROS2 Action 상태에 동기화한 가상 생산 셀입니다.",
+    status="TWIN SYNCHRONIZED",
+)
+workflow_strip(["Product spawn", "Inspection", "Gate action", "Line exit"])
 
 if not MODEL_PATH.exists() or not DATASET_PATH.exists():
     st.error("모델 또는 MVTec 데이터가 없습니다.")

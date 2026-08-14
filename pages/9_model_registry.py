@@ -6,6 +6,8 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+from qcell.ui import inject_global_css, page_header, workflow_strip
+
 from qcell.active_learning import ensure_baseline_registered
 from qcell.model_registry import ModelRegistry
 
@@ -36,8 +38,14 @@ if BASELINE_MODEL.exists():
 versions = registry.versions()
 deployed = registry.deployed()
 
-st.title("📦 Model Registry")
-st.caption("모델 성능을 비교하고 운영 버전을 배포하거나 이전 버전으로 즉시 롤백합니다.")
+inject_global_css()
+page_header(
+    "MLOPS CONTROL PLANE · MODEL REGISTRY",
+    "운영 모델 레지스트리",
+    "모델 성능을 비교하고 운영 버전을 배포하거나 이전 버전으로 즉시 롤백합니다.",
+    status="DEPLOYMENT CONTROL READY",
+)
+workflow_strip(["후보 비교", "배포 승인", "Production 전환", "즉시 Rollback"])
 
 if deployed:
     st.markdown(
