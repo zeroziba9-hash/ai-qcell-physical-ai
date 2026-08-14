@@ -19,6 +19,7 @@ METADATA_PATH = ROOT / "models" / "patch_memory_demo.json"
 REPORT_PATH = ROOT / "docs" / "results" / "evaluation_report.json"
 
 st.set_page_config(page_title="AI-QCell Trained Model", page_icon="🧠", layout="wide")
+inject_global_css()
 st.markdown(
     """
     <style>
@@ -40,7 +41,6 @@ def load_model() -> PatchMemoryDetector:
     return PatchMemoryDetector.load(MODEL_PATH)
 
 
-inject_global_css()
 page_header(
     "UNSUPERVISED AI · PATCH MEMORY",
     "학습형 Patch Memory 검사",

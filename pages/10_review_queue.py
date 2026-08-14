@@ -27,6 +27,7 @@ BASELINE_METADATA = ROOT / "models" / "deep_patchcore_bottle.json"
 BASELINE_REPORT = ROOT / "docs" / "results" / "deep_patchcore_bottle_report.json"
 
 st.set_page_config(page_title="AI-QCell Review Queue", page_icon="🔎", layout="wide")
+inject_global_css()
 st.markdown(
     """
     <style>
@@ -57,7 +58,6 @@ pending = queue.cases("pending")
 confirmed = queue.cases("confirmed")
 corrected = queue.cases("corrected")
 
-inject_global_css()
 page_header(
     "HUMAN-IN-THE-LOOP · REVIEW QUEUE",
     "품질 판정 Review Queue",

@@ -1,9 +1,11 @@
-"""Shared presentation primitives for the AI-QCell Streamlit application."""
+"""Product-grade presentation primitives for the AI-QCell Streamlit console."""
 
 from __future__ import annotations
 
 from html import escape
-from typing import Iterable, Mapping
+import inspect
+from pathlib import Path
+from typing import Iterable, Mapping, Sequence
 
 import streamlit as st
 
@@ -11,99 +13,174 @@ import streamlit as st
 GLOBAL_CSS = r"""
 <style>
 :root {
-    --q-bg: #050913;
-    --q-panel: rgba(12, 20, 36, 0.82);
-    --q-panel-strong: #0c1424;
-    --q-line: rgba(139, 160, 190, 0.18);
-    --q-line-strong: rgba(86, 223, 255, 0.34);
-    --q-text: #f6f9ff;
-    --q-muted: #8fa2bb;
-    --q-cyan: #55ddff;
-    --q-blue: #5d7cff;
-    --q-green: #55e5a3;
-    --q-amber: #ffc866;
-    --q-red: #ff6b7f;
-    --q-radius: 18px;
-    --q-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
+    --q-bg: #080b10;
+    --q-sidebar: #090d13;
+    --q-panel: #0f141c;
+    --q-panel-raised: #121923;
+    --q-panel-soft: #0c1118;
+    --q-line: #222c38;
+    --q-line-soft: rgba(125, 145, 168, 0.13);
+    --q-text: #eaf0f5;
+    --q-muted: #8796a8;
+    --q-dim: #566477;
+    --q-accent: #5be0b8;
+    --q-cyan: #5be0b8;
+    --q-blue: #6aa7ff;
+    --q-amber: #f5bd62;
+    --q-red: #ff7687;
+    --q-radius: 12px;
+    --q-shadow: 0 20px 55px rgba(0, 0, 0, 0.22);
 }
 
 html, body, [class*="css"] {
     font-family: Pretendard, SUIT, Inter, "Noto Sans KR", "Segoe UI", sans-serif;
+    font-variant-numeric: tabular-nums;
 }
 
 [data-testid="stAppViewContainer"] {
     color: var(--q-text);
     background-color: var(--q-bg);
     background-image:
-        radial-gradient(circle at 84% 2%, rgba(55, 102, 255, 0.17), transparent 26rem),
-        radial-gradient(circle at 18% 28%, rgba(24, 197, 222, 0.08), transparent 24rem),
-        linear-gradient(rgba(74, 110, 158, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(74, 110, 158, 0.035) 1px, transparent 1px);
-    background-size: auto, auto, 42px 42px, 42px 42px;
+        linear-gradient(rgba(111, 132, 157, 0.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(111, 132, 157, 0.022) 1px, transparent 1px),
+        radial-gradient(circle at 77% -8%, rgba(91, 224, 184, 0.065), transparent 30rem);
+    background-size: 64px 64px, 64px 64px, auto;
 }
 
 [data-testid="stHeader"] {
-    height: 3.2rem;
-    background: rgba(5, 9, 19, 0.72);
-    border-bottom: 1px solid rgba(139, 160, 190, 0.08);
-    backdrop-filter: blur(18px);
+    height: 2.65rem;
+    background: rgba(8, 11, 16, 0.9);
+    border-bottom: 1px solid rgba(125, 145, 168, 0.07);
+    backdrop-filter: blur(16px);
 }
+[data-testid="stToolbar"], [data-testid="stAppDeployButton"] { visibility: hidden; }
+[data-testid="stDecoration"] { display: none; }
 
 [data-testid="stMainBlockContainer"], .block-container {
-    max-width: 1480px;
-    padding-top: 1.45rem;
+    max-width: 1460px;
+    padding-top: 1.1rem;
     padding-bottom: 4rem;
 }
 
 section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #07101e 0%, #070c16 100%);
+    width: 17.25rem !important;
+    background: var(--q-sidebar);
     border-right: 1px solid var(--q-line);
 }
+section[data-testid="stSidebar"] > div:first-child { padding-top: 0.75rem; }
 
-section[data-testid="stSidebar"] > div:first-child::before {
-    content: "AI · QCELL   /   OPS";
-    display: block;
-    margin: 0.9rem 1rem 0.55rem;
-    padding: 0.78rem 0.9rem;
-    color: var(--q-cyan);
-    border: 1px solid rgba(85, 221, 255, 0.24);
-    border-radius: 12px;
-    background: linear-gradient(120deg, rgba(85, 221, 255, 0.09), rgba(93, 124, 255, 0.08));
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-}
-
-[data-testid="stSidebarNav"] a {
-    min-height: 2.6rem;
-    margin: 0.12rem 0.52rem;
-    padding: 0.48rem 0.72rem;
-    color: #9fb0c6;
-    border: 1px solid transparent;
+.qcell-side-brand {
+    display: grid;
+    grid-template-columns: 2.45rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.72rem;
+    margin: 0.25rem 0.25rem 1rem;
+    padding: 0.72rem;
+    border: 1px solid var(--q-line);
     border-radius: 10px;
-    transition: color 150ms ease, background 150ms ease, border-color 150ms ease;
+    background: #0d131b;
 }
-
-[data-testid="stSidebarNav"] a:hover {
-    color: var(--q-text);
-    background: rgba(85, 221, 255, 0.06);
-    border-color: rgba(85, 221, 255, 0.12);
+.qcell-side-mark {
+    display: grid;
+    width: 2.45rem;
+    height: 2.45rem;
+    place-items: center;
+    color: #07100d;
+    border-radius: 8px;
+    background: var(--q-accent);
+    font: 900 0.88rem/1 Inter, sans-serif;
+    letter-spacing: -0.05em;
 }
-
-[data-testid="stSidebarNav"] a[aria-current="page"] {
-    color: white;
-    background: linear-gradient(110deg, rgba(55, 181, 234, 0.18), rgba(93, 124, 255, 0.14));
-    border-color: rgba(85, 221, 255, 0.26);
-    box-shadow: inset 3px 0 0 var(--q-cyan);
+.qcell-side-name { color: #f3f7fa; font-size: 0.84rem; font-weight: 820; letter-spacing: 0.02em; }
+.qcell-side-sub { margin-top: 0.12rem; color: var(--q-dim); font: 600 0.59rem/1.2 Consolas, monospace; letter-spacing: 0.1em; }
+.qcell-side-live { color: var(--q-accent); font: 800 0.58rem/1 Consolas, monospace; letter-spacing: 0.09em; }
+.qcell-side-live::before {
+    content: "";
+    display: inline-block;
+    width: 0.36rem;
+    height: 0.36rem;
+    margin-right: 0.35rem;
+    border-radius: 50%;
+    background: var(--q-accent);
+    box-shadow: 0 0 9px rgba(91, 224, 184, 0.55);
 }
-
-h1, h2, h3, h4 {
-    color: var(--q-text);
-    letter-spacing: -0.025em;
+.qcell-nav-group {
+    margin: 1rem 0.68rem 0.35rem;
+    color: #4f5d6e;
+    font: 750 0.58rem/1.2 Consolas, monospace;
+    letter-spacing: 0.15em;
 }
+section[data-testid="stSidebar"] [data-testid="stPageLink"] { margin: 0.08rem 0.25rem; }
+section[data-testid="stSidebar"] [data-testid="stPageLink"] a {
+    min-height: 2.25rem;
+    padding: 0.42rem 0.7rem !important;
+    color: #8e9caf !important;
+    border: 1px solid transparent !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 0.76rem !important;
+    font-weight: 650 !important;
+    transition: color 130ms ease, background 130ms ease, border-color 130ms ease !important;
+}
+section[data-testid="stSidebar"] [data-testid="stPageLink"] a:hover {
+    transform: none !important;
+    color: #dce5ed !important;
+    border-color: rgba(125, 145, 168, 0.14) !important;
+    background: rgba(125, 145, 168, 0.055) !important;
+}
+section[data-testid="stSidebar"] [data-testid="stPageLink"] a[aria-current="page"] {
+    color: #f2f7f5 !important;
+    border-color: rgba(91, 224, 184, 0.18) !important;
+    background: rgba(91, 224, 184, 0.075) !important;
+    box-shadow: inset 2px 0 0 var(--q-accent) !important;
+}
+.qcell-nav-link {
+    display: grid;
+    grid-template-columns: 1.35rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.48rem;
+    min-height: 2.25rem;
+    margin: 0.08rem 0.25rem;
+    padding: 0.42rem 0.7rem;
+    color: #8e9caf !important;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    text-decoration: none !important;
+    transition: color 130ms ease, background 130ms ease, border-color 130ms ease;
+}
+.qcell-nav-link:hover {
+    color: #dce5ed !important;
+    border-color: rgba(125, 145, 168, 0.14);
+    background: rgba(125, 145, 168, 0.055);
+}
+.qcell-nav-link.is-active {
+    color: #f2f7f5 !important;
+    border-color: rgba(91, 224, 184, 0.18);
+    background: rgba(91, 224, 184, 0.075);
+    box-shadow: inset 2px 0 0 var(--q-accent);
+}
+.qcell-nav-index {
+    color: #475568;
+    font: 700 0.56rem/1 Consolas, monospace;
+}
+.qcell-nav-link.is-active .qcell-nav-index { color: var(--q-accent); }
+.qcell-nav-title { overflow: hidden; font-size: 0.74rem; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.qcell-side-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 1.1rem 0.5rem 0.7rem;
+    padding-top: 0.75rem;
+    color: #526071;
+    border-top: 1px solid var(--q-line-soft);
+    font: 600 0.58rem/1.4 Consolas, monospace;
+}
+.qcell-side-foot b { color: #8fa095; font-weight: 700; }
 
-h2 { margin-top: 0.35rem; }
-h3 { font-size: 1.05rem; }
+h1, h2, h3, h4 { color: var(--q-text); letter-spacing: -0.025em; }
+h3 { font-size: 1rem; }
 p, label, [data-testid="stCaptionContainer"] { color: var(--q-muted); }
 hr { border-color: var(--q-line) !important; }
 
@@ -111,278 +188,281 @@ hr { border-color: var(--q-line) !important; }
     position: relative;
     overflow: hidden;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: end;
-    gap: 1.5rem;
-    margin: 0 0 1.15rem;
-    padding: clamp(1.3rem, 2.5vw, 2.1rem);
-    border: 1px solid var(--q-line-strong);
-    border-radius: 24px;
-    background:
-        linear-gradient(120deg, rgba(13, 28, 48, 0.96), rgba(9, 16, 31, 0.9)),
-        var(--q-panel-strong);
-    box-shadow: var(--q-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    grid-template-columns: minmax(0, 1fr) 12.5rem;
+    align-items: center;
+    gap: 2rem;
+    margin: 0 0 0.85rem;
+    padding: clamp(1.2rem, 2.2vw, 1.75rem);
+    border: 1px solid var(--q-line);
+    border-radius: 14px;
+    background: linear-gradient(115deg, #111821, #0d131b 76%);
+    box-shadow: var(--q-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
-
 .qcell-hero::before {
     content: "";
     position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background:
-        linear-gradient(90deg, transparent 0 72%, rgba(85, 221, 255, 0.06) 72% 72.3%, transparent 72.3%),
-        radial-gradient(circle at 89% 28%, rgba(85, 221, 255, 0.23), transparent 22%);
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--q-accent), rgba(91, 224, 184, 0.08));
 }
-
+.qcell-hero::after {
+    content: "";
+    position: absolute;
+    top: -70%;
+    right: -2rem;
+    width: 24rem;
+    height: 24rem;
+    border: 1px solid rgba(91, 224, 184, 0.06);
+    border-radius: 50%;
+    box-shadow: 0 0 0 3rem rgba(91, 224, 184, 0.018), 0 0 0 7rem rgba(91, 224, 184, 0.012);
+}
 .qcell-hero-copy, .qcell-hero-meta { position: relative; z-index: 1; }
 .qcell-kicker {
     display: flex;
     align-items: center;
-    gap: 0.55rem;
-    margin-bottom: 0.62rem;
-    color: var(--q-cyan);
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0.16em;
+    gap: 0.58rem;
+    margin-bottom: 0.58rem;
+    color: var(--q-accent);
+    font: 750 0.63rem/1.2 Consolas, monospace;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
 }
-.qcell-kicker::before {
-    content: "";
-    width: 1.9rem;
-    height: 1px;
-    background: var(--q-cyan);
-    box-shadow: 0 0 12px rgba(85, 221, 255, 0.8);
-}
+.qcell-kicker::before { content: "//"; color: #3b755f; }
 .qcell-hero h1 {
     margin: 0;
     max-width: 900px;
-    font-size: clamp(2rem, 4vw, 3.45rem);
-    line-height: 1.02;
-    font-weight: 850;
+    font-size: clamp(1.85rem, 3.4vw, 2.85rem);
+    line-height: 1.08;
+    font-weight: 830;
 }
 .qcell-hero p {
-    max-width: 820px;
-    margin: 0.82rem 0 0;
-    color: #aebdd0;
-    font-size: clamp(0.92rem, 1.3vw, 1.05rem);
-    line-height: 1.7;
+    max-width: 800px;
+    margin: 0.68rem 0 0;
+    color: #98a7b7;
+    font-size: clamp(0.83rem, 1.15vw, 0.94rem);
+    line-height: 1.65;
 }
 .qcell-hero-meta {
-    min-width: 8.5rem;
-    padding: 0.75rem 0.9rem;
-    border: 1px solid rgba(85, 229, 163, 0.27);
-    border-radius: 999px;
-    color: #c8ffe5;
-    background: rgba(26, 139, 91, 0.11);
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 0.11em;
-    text-align: center;
-    white-space: nowrap;
+    padding: 0.82rem 0.9rem;
+    color: #aab8c5;
+    border-left: 1px solid var(--q-line);
+    font: 750 0.62rem/1.45 Consolas, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 .qcell-hero-meta::before {
+    content: "STATUS";
+    display: block;
+    margin-bottom: 0.28rem;
+    color: #4e5c6e;
+    font-size: 0.52rem;
+    letter-spacing: 0.15em;
+}
+.qcell-hero-meta::after {
     content: "";
     display: inline-block;
-    width: 0.46rem;
-    height: 0.46rem;
-    margin-right: 0.5rem;
+    width: 0.4rem;
+    height: 0.4rem;
+    margin-left: 0.52rem;
     border-radius: 50%;
-    background: var(--q-green);
-    box-shadow: 0 0 0 4px rgba(85, 229, 163, 0.1), 0 0 13px rgba(85, 229, 163, 0.75);
+    background: var(--q-accent);
+    box-shadow: 0 0 9px rgba(91, 224, 184, 0.6);
 }
 
 .qcell-status-grid {
     display: grid;
     grid-template-columns: repeat(var(--q-count, 4), minmax(0, 1fr));
-    gap: 0.68rem;
-    margin: 0 0 1.15rem;
-}
-.qcell-status-item {
-    min-width: 0;
-    padding: 0.8rem 0.92rem;
+    margin: 0 0 0.75rem;
     border: 1px solid var(--q-line);
-    border-radius: 13px;
-    background: rgba(9, 17, 31, 0.72);
+    border-radius: 10px;
+    background: var(--q-panel-soft);
 }
+.qcell-status-item { min-width: 0; padding: 0.72rem 0.9rem; }
+.qcell-status-item + .qcell-status-item { border-left: 1px solid var(--q-line); }
 .qcell-status-label {
-    color: #7388a3;
-    font-size: 0.66rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
+    color: #536174;
+    font: 700 0.55rem/1.2 Consolas, monospace;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
 }
 .qcell-status-value {
     overflow: hidden;
-    margin-top: 0.28rem;
-    color: #eaf3ff;
-    font-size: 0.88rem;
-    font-weight: 700;
+    margin-top: 0.3rem;
+    color: #d7e0e8;
+    font-size: 0.79rem;
+    font-weight: 720;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.qcell-status-value[data-tone="good"] { color: var(--q-green); }
+.qcell-status-value[data-tone="good"] { color: var(--q-accent); }
 .qcell-status-value[data-tone="warn"] { color: var(--q-amber); }
 .qcell-status-value[data-tone="bad"] { color: var(--q-red); }
 
 .qcell-flow {
     display: grid;
     grid-template-columns: repeat(var(--q-count, 4), minmax(0, 1fr));
-    gap: 0.45rem;
-    margin: 0 0 1.45rem;
+    margin: 0 0 1.25rem;
+    padding: 0.58rem 0;
+    border-top: 1px solid var(--q-line-soft);
+    border-bottom: 1px solid var(--q-line-soft);
 }
-.qcell-flow-step {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.68rem;
-    min-height: 3.15rem;
-    padding: 0.68rem 0.82rem;
-    border: 1px solid var(--q-line);
-    border-radius: 12px;
-    background: rgba(8, 16, 29, 0.7);
-}
-.qcell-flow-step:not(:last-child)::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    right: -0.52rem;
-    z-index: 2;
-    width: 0.56rem;
-    height: 1px;
-    background: var(--q-cyan);
-}
-.qcell-flow-index {
-    display: grid;
-    flex: 0 0 auto;
-    width: 1.65rem;
-    height: 1.65rem;
-    place-items: center;
-    border-radius: 8px;
-    color: var(--q-cyan);
-    background: rgba(85, 221, 255, 0.1);
-    font-size: 0.67rem;
-    font-weight: 800;
-}
-.qcell-flow-label { color: #dce9f8; font-size: 0.78rem; font-weight: 700; }
+.qcell-flow-step { position: relative; display: flex; align-items: center; gap: 0.6rem; padding: 0.18rem 0.8rem; }
+.qcell-flow-step + .qcell-flow-step { border-left: 1px solid var(--q-line-soft); }
+.qcell-flow-index { color: var(--q-accent); font: 750 0.59rem/1 Consolas, monospace; }
+.qcell-flow-label { color: #7f8fa1; font-size: 0.72rem; font-weight: 660; }
 
 .qcell-section {
     display: flex;
     align-items: end;
     justify-content: space-between;
     gap: 1rem;
-    margin: 1.75rem 0 0.8rem;
+    margin: 1.55rem 0 0.7rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--q-line-soft);
 }
-.qcell-section h2 { margin: 0; font-size: clamp(1.22rem, 2vw, 1.62rem); }
-.qcell-section p { max-width: 720px; margin: 0.28rem 0 0; font-size: 0.83rem; line-height: 1.55; }
-.qcell-section-code { color: #657d9b; font: 700 0.68rem/1.2 Consolas, monospace; letter-spacing: 0.08em; }
+.qcell-section h2 { margin: 0; font-size: clamp(1.1rem, 1.8vw, 1.4rem); font-weight: 780; }
+.qcell-section p { max-width: 720px; margin: 0.25rem 0 0; color: #708095; font-size: 0.77rem; line-height: 1.5; }
+.qcell-section-code { color: #465466; font: 700 0.58rem/1.2 Consolas, monospace; letter-spacing: 0.1em; }
 
 [data-testid="stMetric"] {
-    min-height: 7.2rem;
-    padding: 1rem 1.05rem;
+    position: relative;
+    min-height: 6.5rem;
+    padding: 0.92rem 1rem;
     border: 1px solid var(--q-line) !important;
     border-radius: var(--q-radius) !important;
-    background: linear-gradient(145deg, rgba(15, 27, 47, 0.9), rgba(8, 15, 28, 0.9)) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.035), 0 10px 30px rgba(0,0,0,0.14);
+    background: var(--q-panel) !important;
+    box-shadow: none !important;
 }
-[data-testid="stMetric"] label { color: #8094ad !important; font-size: 0.75rem !important; }
-[data-testid="stMetricValue"] { color: #f5f9ff; font-weight: 800; letter-spacing: -0.035em; }
-[data-testid="stMetricDelta"] { font-weight: 700; }
+[data-testid="stMetric"]::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 1rem;
+    width: 2.2rem;
+    height: 2px;
+    background: var(--q-accent);
+}
+[data-testid="stMetric"] label { color: #66768a !important; font-size: 0.69rem !important; }
+[data-testid="stMetricValue"] { color: #edf3f6; font-weight: 790; letter-spacing: -0.035em; }
+[data-testid="stMetricDelta"] { font-size: 0.65rem; font-weight: 700; }
 
 [data-testid="stVerticalBlockBorderWrapper"] {
     border-color: var(--q-line) !important;
     border-radius: var(--q-radius) !important;
-    background: rgba(8, 16, 29, 0.55);
-    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+    background: rgba(15, 20, 28, 0.7);
+    box-shadow: none;
 }
 
-.stButton > button, .stDownloadButton > button, [data-testid="stPageLink"] a {
-    min-height: 2.75rem;
-    border: 1px solid rgba(129, 154, 188, 0.26) !important;
-    border-radius: 11px !important;
-    color: #e8f2ff !important;
-    background: linear-gradient(145deg, rgba(22, 35, 56, 0.94), rgba(12, 21, 38, 0.94)) !important;
-    font-weight: 750 !important;
-    transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease !important;
+.stButton > button, .stDownloadButton > button {
+    min-height: 2.55rem;
+    border: 1px solid #2a3542 !important;
+    border-radius: 8px !important;
+    color: #d9e2e9 !important;
+    background: #121923 !important;
+    box-shadow: none !important;
+    font-weight: 720 !important;
+    transition: border-color 130ms ease, background 130ms ease !important;
 }
-.stButton > button:hover, .stDownloadButton > button:hover, [data-testid="stPageLink"] a:hover {
-    transform: translateY(-1px);
-    border-color: rgba(85, 221, 255, 0.55) !important;
-    box-shadow: 0 8px 24px rgba(45, 190, 231, 0.11);
+.stButton > button:hover, .stDownloadButton > button:hover {
+    transform: none !important;
+    border-color: #526476 !important;
+    background: #161e29 !important;
 }
 .stButton > button[kind="primary"], button[data-testid="stBaseButton-primary"] {
-    border-color: rgba(85, 221, 255, 0.65) !important;
-    color: #03111c !important;
-    background: linear-gradient(110deg, #55ddff, #6e8cff) !important;
-    box-shadow: 0 8px 26px rgba(75, 169, 255, 0.24);
+    color: #07120e !important;
+    border-color: var(--q-accent) !important;
+    background: var(--q-accent) !important;
 }
 
-[data-baseweb="select"] > div,
-[data-baseweb="input"] > div,
-[data-testid="stFileUploaderDropzone"],
-[data-testid="stTextInputRootElement"] {
-    border-color: rgba(129, 154, 188, 0.24) !important;
-    border-radius: 11px !important;
-    background: rgba(7, 14, 26, 0.82) !important;
+[data-baseweb="select"] > div, [data-baseweb="input"] > div,
+[data-testid="stFileUploaderDropzone"], [data-testid="stTextInputRootElement"] {
+    border-color: #283341 !important;
+    border-radius: 8px !important;
+    background: #0c1118 !important;
 }
-[data-testid="stFileUploaderDropzone"] { padding: 1rem; }
+[data-testid="stFileUploaderDropzone"] { padding: 0.9rem; }
+[data-testid="stTabs"] [role="tablist"] { gap: 0.2rem; border-bottom: 1px solid var(--q-line); }
+[data-testid="stTabs"] button[role="tab"] { border-radius: 7px 7px 0 0; }
+[data-testid="stTabs"] button[role="tab"][aria-selected="true"] { color: var(--q-accent); background: rgba(91, 224, 184, 0.045); }
+[data-testid="stDataFrame"], [data-testid="stTable"] { overflow: hidden; border: 1px solid var(--q-line); border-radius: 9px; }
+[data-testid="stImage"] img { border: 1px solid var(--q-line); border-radius: 9px; }
+[data-testid="stAlert"] { border-radius: 8px; border-color: var(--q-line); }
+[data-testid="stExpander"] { border-color: var(--q-line); border-radius: 8px; background: #0d1219; }
+[data-testid="stProgress"] > div > div { background: var(--q-accent); }
 
-[data-testid="stTabs"] [role="tablist"] {
-    gap: 0.35rem;
-    padding: 0.3rem;
-    border: 1px solid var(--q-line);
-    border-radius: 12px;
-    background: rgba(8, 16, 29, 0.72);
+.qcell-launch-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.7rem;
 }
-[data-testid="stTabs"] button[role="tab"] { border-radius: 9px; }
-[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
-    color: white;
-    background: rgba(85, 221, 255, 0.09);
-}
-
-[data-testid="stDataFrame"], [data-testid="stTable"] {
+.qcell-launch-card {
+    position: relative;
     overflow: hidden;
+    min-height: 10.3rem;
+    padding: 1rem;
+    color: inherit !important;
     border: 1px solid var(--q-line);
-    border-radius: 14px;
-    background: rgba(7, 14, 26, 0.78);
+    border-radius: 11px;
+    background: var(--q-panel);
+    text-decoration: none !important;
+    transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
 }
-[data-testid="stImage"] img { border-radius: 14px; border: 1px solid var(--q-line); }
-[data-testid="stAlert"] { border-radius: 13px; border-color: var(--q-line); }
-[data-testid="stExpander"] { border-color: var(--q-line); border-radius: 13px; background: rgba(8, 16, 29, 0.65); }
-[data-testid="stProgress"] > div > div { background: linear-gradient(90deg, var(--q-cyan), var(--q-blue)); }
-
-.qcell-module-card {
-    min-height: 9.2rem;
-    margin-bottom: 0.6rem;
-    padding: 1.05rem;
-    border: 1px solid var(--q-line);
-    border-radius: var(--q-radius);
-    background: linear-gradient(145deg, rgba(15, 27, 47, 0.84), rgba(7, 14, 26, 0.82));
+.qcell-launch-card:hover {
+    transform: translateY(-2px);
+    border-color: #3b4a59;
+    background: var(--q-panel-raised);
 }
-.qcell-module-card span { color: var(--q-cyan); font: 800 0.65rem/1 Consolas, monospace; letter-spacing: 0.1em; }
-.qcell-module-card h3 { margin: 0.72rem 0 0.42rem; font-size: 1.03rem; }
-.qcell-module-card p { margin: 0; font-size: 0.79rem; line-height: 1.55; }
-
-*:focus-visible {
-    outline: 2px solid var(--q-cyan) !important;
-    outline-offset: 2px !important;
+.qcell-launch-card[data-featured="true"] {
+    grid-column: span 2;
+    background: linear-gradient(120deg, #101a20, #10161f);
+}
+.qcell-launch-card[data-featured="true"]::after {
+    content: "";
+    position: absolute;
+    right: -3rem;
+    bottom: -4rem;
+    width: 11rem;
+    height: 11rem;
+    border: 1px solid rgba(91, 224, 184, 0.09);
+    border-radius: 50%;
+    box-shadow: 0 0 0 2rem rgba(91, 224, 184, 0.02), 0 0 0 4rem rgba(91, 224, 184, 0.012);
+}
+.qcell-launch-top { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.qcell-launch-code { color: #526173; font: 700 0.55rem/1.2 Consolas, monospace; letter-spacing: 0.1em; }
+.qcell-launch-arrow { color: #536274; font-size: 1rem; transition: color 140ms ease, transform 140ms ease; }
+.qcell-launch-card:hover .qcell-launch-arrow { color: var(--q-accent); transform: translateX(2px); }
+.qcell-launch-card h3 { margin: 1.15rem 0 0.42rem; color: #e5ecef; font-size: 0.95rem; font-weight: 750; }
+.qcell-launch-card p { max-width: 30rem; margin: 0; color: #718095; font-size: 0.72rem; line-height: 1.55; }
+.qcell-launch-tag {
+    display: inline-block;
+    margin-top: 0.9rem;
+    color: #6d817a;
+    font: 650 0.54rem/1.2 Consolas, monospace;
+    letter-spacing: 0.09em;
 }
 
+*:focus-visible { outline: 2px solid var(--q-accent) !important; outline-offset: 2px !important; }
+
+@media (max-width: 1080px) {
+    .qcell-launch-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 900px) {
     [data-testid="stMainBlockContainer"], .block-container { padding-left: 1rem; padding-right: 1rem; }
-    .qcell-hero { grid-template-columns: 1fr; align-items: start; }
-    .qcell-hero-meta { justify-self: start; }
+    .qcell-hero { grid-template-columns: 1fr; gap: 1rem; }
+    .qcell-hero-meta { border-top: 1px solid var(--q-line); border-left: 0; }
     .qcell-status-grid, .qcell-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .qcell-flow-step:nth-child(2)::after { display: none; }
+    .qcell-status-item:nth-child(3) { border-left: 0; border-top: 1px solid var(--q-line); }
+    .qcell-status-item:nth-child(4) { border-top: 1px solid var(--q-line); }
 }
-
 @media (max-width: 560px) {
-    .qcell-hero { padding: 1.15rem; border-radius: 18px; }
-    .qcell-hero h1 { font-size: 1.88rem; }
-    .qcell-status-grid, .qcell-flow { grid-template-columns: 1fr; }
-    .qcell-flow-step::after { display: none; }
+    .qcell-hero { padding: 1.05rem; border-radius: 10px; }
+    .qcell-hero h1 { font-size: 1.72rem; }
+    .qcell-status-grid, .qcell-flow, .qcell-launch-grid { grid-template-columns: 1fr; }
+    .qcell-launch-card[data-featured="true"] { grid-column: span 1; }
+    .qcell-status-item + .qcell-status-item { border-top: 1px solid var(--q-line); border-left: 0; }
+    .qcell-flow-step + .qcell-flow-step { border-top: 1px solid var(--q-line-soft); border-left: 0; }
     .qcell-section { align-items: start; flex-direction: column; }
 }
-
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
 }
@@ -390,56 +470,99 @@ hr { border-color: var(--q-line) !important; }
 """
 
 
-def inject_global_css() -> None:
-    """Apply the app-wide AI-QCell visual language after any page-local CSS."""
+NAV_GROUPS: Sequence[tuple[str, Sequence[tuple[str, str]]]] = (
+    ("OVERVIEW", (("app.py", "00  운영 대시보드"),)),
+    (
+        "INSPECTION",
+        (
+            ("pages/1_vision_inspection.py", "01  기준 영상 검사"),
+            ("pages/2_trained_patch_model.py", "02  Patch Memory"),
+            ("pages/3_deep_patchcore_mvtec.py", "03  Deep PatchCore"),
+            ("pages/5_realtime_inspection.py", "04  실시간 검사"),
+        ),
+    ),
+    (
+        "AUTOMATION",
+        (
+            ("pages/4_ros2_sorting_pipeline.py", "05  ROS2 자동 선별"),
+            ("pages/6_actuator_digital_twin.py", "06  액추에이터 트윈"),
+            ("pages/11_edge_runtime_benchmark.py", "07  Edge Runtime"),
+        ),
+    ),
+    (
+        "MODEL LIFECYCLE",
+        (
+            ("pages/7_dataset_studio.py", "08  Dataset Studio"),
+            ("pages/8_training_lab.py", "09  Training Lab"),
+            ("pages/9_model_registry.py", "10  Model Registry"),
+            ("pages/10_review_queue.py", "11  Review Queue"),
+        ),
+    ),
+)
 
-    st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 
-
-def page_header(
-    eyebrow: str,
-    title: str,
-    description: str,
-    *,
-    status: str = "SYSTEM ONLINE",
-) -> None:
-    """Render a consistent page hero with safely escaped copy."""
-
-    st.markdown(
-        page_header_html(eyebrow, title, description, status=status),
+def _render_sidebar_navigation(active_script: str) -> None:
+    st.sidebar.markdown(
+        """
+        <div class="qcell-side-brand">
+          <div class="qcell-side-mark">QC</div>
+          <div><div class="qcell-side-name">AI-QCell</div><div class="qcell-side-sub">QUALITY OS / R2</div></div>
+          <div class="qcell-side-live">LIVE</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    for group, links in NAV_GROUPS:
+        rendered_links = []
+        for page, label in links:
+            page_name = page.rsplit("/", 1)[-1]
+            stem = page_name.removesuffix(".py")
+            href = "/" if stem == "app" else f'/{stem.split("_", 1)[-1]}'
+            index, title = label.split("  ", 1)
+            active_class = " is-active" if page_name == active_script else ""
+            aria_current = ' aria-current="page"' if active_class else ""
+            rendered_links.append(
+                f'<a class="qcell-nav-link{active_class}" href="{escape(href, quote=True)}" '
+                f'target="_self"{aria_current}><span class="qcell-nav-index">{escape(index)}</span>'
+                f'<span class="qcell-nav-title">{escape(title)}</span></a>'
+            )
+        st.sidebar.markdown(
+            f'<div class="qcell-nav-group">{escape(group)}</div>{"".join(rendered_links)}',
+            unsafe_allow_html=True,
+        )
+    st.sidebar.markdown(
+        '<div class="qcell-side-foot"><span>EDGE NODE / 01</span><b>CONNECTED</b></div>',
         unsafe_allow_html=True,
     )
 
 
-def page_header_html(
-    eyebrow: str,
-    title: str,
-    description: str,
-    *,
-    status: str = "SYSTEM ONLINE",
-) -> str:
+def inject_global_css() -> None:
+    """Apply the visual system early and render the grouped product navigation."""
+
+    st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
+    caller = Path(inspect.stack()[1].filename).name
+    _render_sidebar_navigation(caller)
+
+
+def page_header(eyebrow: str, title: str, description: str, *, status: str = "SYSTEM ONLINE") -> None:
+    st.markdown(page_header_html(eyebrow, title, description, status=status), unsafe_allow_html=True)
+
+
+def page_header_html(eyebrow: str, title: str, description: str, *, status: str = "SYSTEM ONLINE") -> str:
     return (
-        '<div class="qcell-hero">'
-        '<div class="qcell-hero-copy">'
-        f'<div class="qcell-kicker">{escape(eyebrow)}</div>'
-        f'<h1>{escape(title)}</h1>'
-        f'<p>{escape(description)}</p>'
-        '</div>'
-        f'<div class="qcell-hero-meta">{escape(status)}</div>'
-        '</div>'
+        '<div class="qcell-hero"><div class="qcell-hero-copy">'
+        f'<div class="qcell-kicker">{escape(eyebrow)}</div><h1>{escape(title)}</h1>'
+        f'<p>{escape(description)}</p></div><div class="qcell-hero-meta">{escape(status)}</div></div>'
     )
 
 
 def status_strip(items: Iterable[Mapping[str, str]]) -> None:
-    """Render compact operational status values above dense content."""
-
     materialized = list(items)
     cards = "".join(
         '<div class="qcell-status-item">'
         f'<div class="qcell-status-label">{escape(str(item["label"]))}</div>'
         f'<div class="qcell-status-value" data-tone="{escape(str(item.get("tone", "neutral")))}">'
-        f'{escape(str(item["value"]))}</div>'
-        '</div>'
+        f'{escape(str(item["value"]))}</div></div>'
         for item in materialized
     )
     st.markdown(
@@ -449,14 +572,10 @@ def status_strip(items: Iterable[Mapping[str, str]]) -> None:
 
 
 def workflow_strip(steps: Iterable[str]) -> None:
-    """Show the physical-AI loop as a lightweight numbered process strip."""
-
     materialized = list(steps)
     cards = "".join(
-        '<div class="qcell-flow-step">'
-        f'<div class="qcell-flow-index">{index:02d}</div>'
-        f'<div class="qcell-flow-label">{escape(step)}</div>'
-        '</div>'
+        f'<div class="qcell-flow-step"><div class="qcell-flow-index">{index:02d}</div>'
+        f'<div class="qcell-flow-label">{escape(step)}</div></div>'
         for index, step in enumerate(materialized, start=1)
     )
     st.markdown(
@@ -466,27 +585,27 @@ def workflow_strip(steps: Iterable[str]) -> None:
 
 
 def section_header(title: str, description: str = "", *, code: str = "") -> None:
-    """Separate dashboard sections without using oversized Streamlit headings."""
-
     description_html = f'<p>{escape(description)}</p>' if description else ""
     code_html = f'<div class="qcell-section-code">{escape(code)}</div>' if code else ""
     st.markdown(
-        '<div class="qcell-section">'
-        f'<div><h2>{escape(title)}</h2>{description_html}</div>'
-        f'{code_html}'
-        '</div>',
+        f'<div class="qcell-section"><div><h2>{escape(title)}</h2>{description_html}</div>{code_html}</div>',
         unsafe_allow_html=True,
     )
 
 
-def module_card(code: str, title: str, description: str) -> None:
-    """Introduce a linked application module in the home launchpad."""
-
-    st.markdown(
-        '<div class="qcell-module-card">'
-        f'<span>{escape(code)}</span>'
-        f'<h3>{escape(title)}</h3>'
-        f'<p>{escape(description)}</p>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
+def module_grid(items: Iterable[Mapping[str, str | bool]]) -> None:
+    cards = []
+    for item in items:
+        featured = "true" if bool(item.get("featured", False)) else "false"
+        cards.append(
+            f'<a class="qcell-launch-card" data-featured="{featured}" '
+            f'href="{escape(str(item["href"]), quote=True)}" target="_self">'
+            '<div class="qcell-launch-top">'
+            f'<span class="qcell-launch-code">{escape(str(item["code"]))}</span>'
+            '<span class="qcell-launch-arrow">→</span></div>'
+            f'<h3>{escape(str(item["title"]))}</h3>'
+            f'<p>{escape(str(item["description"]))}</p>'
+            f'<span class="qcell-launch-tag">{escape(str(item.get("tag", "OPEN MODULE")))}</span>'
+            '</a>'
+        )
+    st.markdown(f'<div class="qcell-launch-grid">{"".join(cards)}</div>', unsafe_allow_html=True)

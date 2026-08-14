@@ -26,6 +26,7 @@ BASELINE_METADATA = ROOT / "models" / "deep_patchcore_bottle.json"
 BASELINE_REPORT = ROOT / "docs" / "results" / "deep_patchcore_bottle_report.json"
 
 st.set_page_config(page_title="AI-QCell Training Lab", page_icon="🧪", layout="wide")
+inject_global_css()
 st.markdown(
     """
     <style>
@@ -46,7 +47,6 @@ stats = dataset.statistics()
 device_label = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU"
 ready = len(bundle.train_normal) >= 3 and len(bundle.validation_normal) >= 1
 
-inject_global_css()
 page_header(
     "MODEL LIFECYCLE · TRAINING LAB",
     "Deep PatchCore Training Lab",
