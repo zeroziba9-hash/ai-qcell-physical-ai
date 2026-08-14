@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+
+from qcell.ui import inject_global_css, page_header, workflow_strip
 import torch
 
 from qcell.active_learning import (
@@ -44,8 +46,14 @@ stats = dataset.statistics()
 device_label = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU"
 ready = len(bundle.train_normal) >= 3 and len(bundle.validation_normal) >= 1
 
-st.title("🧪 Training Lab")
-st.caption("Dataset Studio의 정상 패치로 학습하고 라벨된 검증 데이터로 임계값을 자동 보정합니다.")
+inject_global_css()
+page_header(
+    "MODEL LIFECYCLE · TRAINING LAB",
+    "Deep PatchCore Training Lab",
+    "Dataset Studio의 정상 패치로 학습하고 라벨된 검증 데이터로 임계값을 자동 보정합니다.",
+    status="TRAINING WORKSPACE READY",
+)
+workflow_strip(["데이터 로드", "모델 학습", "임계값 보정", "Registry 등록"])
 
 c1, c2, c3, c4, c5 = st.columns(5)
 c1.metric("정상 TRAIN", len(bundle.train_normal))

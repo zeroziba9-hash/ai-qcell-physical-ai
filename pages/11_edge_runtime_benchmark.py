@@ -7,6 +7,8 @@ import pandas as pd
 from PIL import Image
 import streamlit as st
 
+from qcell.ui import inject_global_css, page_header, workflow_strip
+
 from qcell.deep_patchcore import DeepPatchCore, load_mvtec_bottle
 from qcell.edge_runtime import OnnxDeepPatchCore, TensorRTDeepPatchCore, runtime_readiness
 from qcell.model_registry import ModelRegistry
@@ -43,8 +45,14 @@ onnx_path = EDGE_ROOT / f"deep_patchcore_{version_id}.onnx"
 engine_path = EDGE_ROOT / f"deep_patchcore_{version_id}.engine"
 readiness = runtime_readiness()
 
-st.title("⚡ Edge Runtime Benchmark")
-st.caption("동일한 Deep PatchCore 전체 검사 그래프를 PyTorch, ONNX Runtime, TensorRT로 변환·비교합니다.")
+inject_global_css()
+page_header(
+    "EDGE DEPLOYMENT · RUNTIME BENCHMARK",
+    "Edge AI Runtime Benchmark",
+    "동일한 Deep PatchCore 검사 그래프를 PyTorch, ONNX Runtime과 TensorRT로 변환해 성능을 비교합니다.",
+    status="EDGE PROFILER READY",
+)
+workflow_strip(["PyTorch baseline", "ONNX export", "TensorRT engine", "Latency report"])
 st.markdown(
     """
     <div class="runtime-flow">

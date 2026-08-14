@@ -5,6 +5,8 @@ from pathlib import Path
 import pandas as pd
 from PIL import Image
 import streamlit as st
+
+from qcell.ui import inject_global_css, page_header, workflow_strip
 import torch
 
 from qcell.deep_patchcore import DeepPatchCore, load_mvtec_bottle
@@ -72,8 +74,14 @@ def render_pipeline(run: PipelineRun, current_step: int) -> None:
     st.markdown(f'<div class="pipeline">{"".join(cards)}</div>', unsafe_allow_html=True)
 
 
-st.title("🤖 ROS2 자동 선별 디지털 트윈")
-st.caption("MVTec 제품 투입부터 Deep PatchCore 검사, PASS/REJECT 결정, 리젝트 액추에이터까지 재현합니다.")
+inject_global_css()
+page_header(
+    "CLOSED-LOOP AUTOMATION · ROS2",
+    "ROS2 자동 선별 파이프라인",
+    "MVTec 제품 투입부터 Deep PatchCore 검사, PASS/REJECT 결정, 리젝트 액추에이터까지 재현합니다.",
+    status="MOTION BUS READY",
+)
+workflow_strip(["제품 투입", "AI 검사", "ROS2 Goal", "Actuator result"])
 
 if not MODEL_PATH.exists() or not DATASET_PATH.exists():
     st.error("모델 또는 MVTec 데이터가 없습니다. 먼저 Deep PatchCore 학습 단계를 실행하세요.")

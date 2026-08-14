@@ -3,6 +3,8 @@ from __future__ import annotations
 from io import BytesIO
 
 import streamlit as st
+
+from qcell.ui import inject_global_css, page_header, workflow_strip
 from PIL import Image
 
 from qcell.vision import generate_demo_pair, inspect_against_reference
@@ -25,8 +27,14 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title("🔍 AI 비전 불량검사")
-st.caption("정상 기준 이미지와 검사 대상을 비교해 결함 위치와 제거 명령을 생성합니다.")
+inject_global_css()
+page_header(
+    "CLASSIC VISION · REFERENCE INSPECTION",
+    "AI 비전 불량검사",
+    "정상 기준 이미지와 검사 대상을 비교해 결함 위치와 제거 명령을 생성합니다.",
+    status="MVP INSPECTOR READY",
+)
+workflow_strip(["기준 이미지", "픽셀 비교", "결함 히트맵", "선별 명령"])
 
 control_col, upload_col = st.columns([0.36, 0.64], gap="large")
 with control_col:
