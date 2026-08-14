@@ -36,9 +36,10 @@ def test_navigation_covers_every_operational_page_once() -> None:
     pages = [page for page, _ in links]
 
     assert len(NAV_GROUPS) == 4
-    assert len(pages) == 12
+    assert len(pages) == 13
     assert len(set(pages)) == len(pages)
     assert pages[0] == "app.py"
+    assert "pages/12_quality_analytics.py" in pages
     assert "pages/3_deep_patchcore_mvtec.py" in pages
     assert "pages/11_edge_runtime_benchmark.py" in pages
 

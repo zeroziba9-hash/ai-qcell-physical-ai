@@ -137,5 +137,6 @@ module_grid(
         {"code": "09 / TRAINING", "title": "Training Lab", "description": "학습, 임계값 보정과 평가 리포트를 생성합니다.", "href": "/training_lab"},
         {"code": "10 / MLOPS", "title": "Model Registry", "description": "후보 모델 비교, 배포와 롤백을 제어합니다.", "href": "/model_registry"},
         {"code": "11 / HUMAN LOOP", "title": "Review Queue", "description": "애매한 판정을 검수해 데이터셋으로 되돌립니다.", "href": "/review_queue"},
+        {"code": "12 / QUALITY OPS", "title": "교대 품질 분석", "description": "SPC 관리도, 결함 Pareto와 운영 알람을 교대 리포트로 저장합니다.", "href": "/quality_analytics"},
     ]
 )

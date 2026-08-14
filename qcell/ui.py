@@ -523,7 +523,13 @@ hr { border-color: var(--q-line) !important; }
 
 
 NAV_GROUPS: Sequence[tuple[str, Sequence[tuple[str, str]]]] = (
-    ("OVERVIEW", (("app.py", "00  운영 대시보드"),)),
+    (
+        "OVERVIEW",
+        (
+            ("app.py", "00  운영 대시보드"),
+            ("pages/12_quality_analytics.py", "12  품질 분석 리포트"),
+        ),
+    ),
     (
         "INSPECTION",
         (
