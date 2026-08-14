@@ -29,10 +29,11 @@ st.markdown(
     <style>
     .block-container {padding-top:1.35rem;padding-bottom:3rem;}
     [data-testid="stMetric"] {background:#0f172a;border:1px solid #263244;padding:14px;border-radius:14px;}
-    .runtime-flow {display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0 22px;}
-    .runtime-card {padding:16px;border:1px solid #334155;border-radius:14px;background:#0b1220;}
-    .runtime-card strong {display:block;color:#67e8f9;font-size:1.05rem;margin-bottom:5px;}
-    .runtime-card span {color:#94a3b8;font-size:.86rem;}
+    .runtime-flow {display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0 20px;}
+    .runtime-card {min-width:0;padding:16px;border:1px solid #283442;border-radius:10px;background:#0f141c;}
+    .runtime-card strong {display:block;color:#5be0b8;font-size:1rem;margin-bottom:6px;word-break:keep-all;}
+    .runtime-card span {display:block;color:#8e9caf;font-size:.82rem;line-height:1.55;word-break:keep-all;overflow-wrap:break-word;}
+    @media (max-width:720px) {.runtime-flow {grid-template-columns:1fr;}}
     </style>
     """,
     unsafe_allow_html=True,

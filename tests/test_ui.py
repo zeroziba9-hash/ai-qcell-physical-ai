@@ -24,6 +24,11 @@ def test_design_system_includes_responsive_and_accessible_states() -> None:
     assert ":focus-visible" in GLOBAL_CSS
     assert "--q-cyan" in GLOBAL_CSS
     assert ".qcell-nav-link.is-active" in GLOBAL_CSS
+    assert '[data-testid="stHeader"]' in GLOBAL_CSS
+    assert "text-overflow: clip !important" in GLOBAL_CSS
+    assert ':has(> [data-testid="stColumn"]:nth-child(5):last-child' in GLOBAL_CSS
+    assert '[data-testid="stMetricValue"] p' in GLOBAL_CSS
+    assert "repeat(auto-fit, minmax(190px, 1fr))" in GLOBAL_CSS
 
 
 def test_navigation_covers_every_operational_page_once() -> None:
