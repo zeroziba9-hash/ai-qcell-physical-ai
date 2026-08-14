@@ -23,6 +23,7 @@ REPORT_PATH = ROOT / "docs" / "results" / "deep_patchcore_bottle_report.json"
 VISUAL_PATH = ROOT / "docs" / "images" / "deep_patchcore_bottle_evaluation.png"
 
 st.set_page_config(page_title="AI-QCell Deep PatchCore", page_icon="🧬", layout="wide")
+inject_global_css()
 st.markdown(
     """
     <style>
@@ -45,7 +46,6 @@ def load_deep_model(path: str, modified_ns: int) -> DeepPatchCore:
     return DeepPatchCore.load(path)
 
 
-inject_global_css()
 page_header(
     "PRODUCTION VISION · MVTec AD",
     "Deep PatchCore 산업 결함검사",

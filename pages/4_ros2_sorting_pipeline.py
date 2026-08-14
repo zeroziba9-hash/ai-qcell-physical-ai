@@ -21,6 +21,7 @@ MODEL_PATH, MODEL_VERSION = ModelRegistry(REGISTRY_ROOT).resolve_model_path(FALL
 DATASET_PATH = ROOT / "data" / "mvtec-ad" / "bottle"
 
 st.set_page_config(page_title="AI-QCell ROS2 Sorting", page_icon="🤖", layout="wide")
+inject_global_css()
 st.markdown(
     """
     <style>
@@ -74,7 +75,6 @@ def render_pipeline(run: PipelineRun, current_step: int) -> None:
     st.markdown(f'<div class="pipeline">{"".join(cards)}</div>', unsafe_allow_html=True)
 
 
-inject_global_css()
 page_header(
     "CLOSED-LOOP AUTOMATION · ROS2",
     "ROS2 자동 선별 파이프라인",

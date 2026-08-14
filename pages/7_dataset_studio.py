@@ -18,6 +18,7 @@ DATASET_ROOT = ACTIVE_ROOT / "dataset"
 MVTEC_ROOT = ROOT / "data" / "mvtec-ad" / "bottle"
 
 st.set_page_config(page_title="AI-QCell Dataset Studio", page_icon="📸", layout="wide")
+inject_global_css()
 st.markdown(
     """
     <style>
@@ -32,7 +33,6 @@ st.markdown(
 dataset = DatasetStudio(DATASET_ROOT)
 stats = dataset.statistics()
 
-inject_global_css()
 page_header(
     "DATA OPERATIONS · DATASET STUDIO",
     "현장 데이터셋 스튜디오",

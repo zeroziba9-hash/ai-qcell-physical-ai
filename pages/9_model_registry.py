@@ -20,6 +20,7 @@ BASELINE_METADATA = ROOT / "models" / "deep_patchcore_bottle.json"
 BASELINE_REPORT = ROOT / "docs" / "results" / "deep_patchcore_bottle_report.json"
 
 st.set_page_config(page_title="AI-QCell Model Registry", page_icon="📦", layout="wide")
+inject_global_css()
 st.markdown(
     """
     <style>
@@ -38,7 +39,6 @@ if BASELINE_MODEL.exists():
 versions = registry.versions()
 deployed = registry.deployed()
 
-inject_global_css()
 page_header(
     "MLOPS CONTROL PLANE · MODEL REGISTRY",
     "운영 모델 레지스트리",

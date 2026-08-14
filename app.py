@@ -5,7 +5,7 @@ import plotly.express as px
 import streamlit as st
 
 from qcell import LineSimulator
-from qcell.ui import inject_global_css, module_card, page_header, section_header, status_strip, workflow_strip
+from qcell.ui import inject_global_css, module_grid, page_header, section_header, status_strip, workflow_strip
 
 
 st.set_page_config(page_title="AI-QCell", page_icon="🏭", layout="wide")
@@ -15,7 +15,7 @@ page_header(
     "PHYSICAL AI · QUALITY OPERATING SYSTEM",
     "AI-QCell 스마트 품질 셀",
     "비전 검사부터 이상 판정, ROS2 자동 선별, 모델 학습과 엣지 배포까지 하나의 운영 화면에서 연결합니다.",
-    status="CONTROL PLANE ONLINE",
+    status="CELL OS / RELEASE 2.0",
 )
 
 if "events" not in st.session_state:
@@ -85,15 +85,15 @@ else:
                 y="count",
                 color="defect_type",
                 text_auto=True,
-                color_discrete_sequence=["#55ddff", "#6e8cff", "#ff6b7f"],
+                color_discrete_sequence=["#5be0b8", "#6aa7ff", "#ff7687"],
             )
             figure.update_layout(
                 showlegend=False,
                 xaxis_title="결함 유형",
                 yaxis_title="건수",
                 paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(7,14,26,0.55)",
-                font_color="#9fb0c6",
+                plot_bgcolor="rgba(12,17,24,0.8)",
+                font_color="#8796a8",
                 margin=dict(l=20, r=20, t=20, b=20),
             )
             st.plotly_chart(figure, use_container_width=True)
@@ -106,27 +106,36 @@ else:
         st.success(f"{latest['product_id']} · PASS_THROUGH · 정상 제품 통과")
 
 section_header(
-    "모듈 런치패드",
-    "데이터 준비부터 현장 추론과 제어까지 필요한 작업 화면으로 바로 이동합니다.",
+    "운영 모듈",
+    "현장 검사와 자동 선별을 중심으로 데이터·모델 운영 도구까지 연결합니다.",
     code="APPLICATION MAP / 03",
 )
-modules = [
-    ("01 · CLASSIC VISION", "기준 영상 검사", "기준 제품과 픽셀 차이를 비교하는 빠른 MVP 검사입니다.", "pages/1_vision_inspection.py"),
-    ("02 · PATCH MEMORY", "학습형 패치 검사", "정상 제품만으로 학습한 경량 비지도 이상 탐지입니다.", "pages/2_trained_patch_model.py"),
-    ("03 · DEEP MODEL", "Deep PatchCore", "MVTec AD 기반 생산 모델과 결함 히트맵을 확인합니다.", "pages/3_deep_patchcore_mvtec.py"),
-    ("04 · CLOSED LOOP", "ROS2 자동 선별", "판정에서 액추에이터 피드백까지 폐루프를 재현합니다.", "pages/4_ros2_sorting_pipeline.py"),
-    ("05 · LIVE VISION", "실시간 검사", "카메라와 영상 스트림을 프레임 단위로 검사합니다.", "pages/5_realtime_inspection.py"),
-    ("06 · DIGITAL TWIN", "액추에이터 트윈", "컨베이어와 선별 게이트 동작을 시각적으로 검증합니다.", "pages/6_actuator_digital_twin.py"),
-    ("07 · DATA OPS", "Dataset Studio", "수집, 라벨링과 데이터 분할을 관리합니다.", "pages/7_dataset_studio.py"),
-    ("08 · TRAINING", "Training Lab", "학습, 임계값 보정과 평가 리포트를 생성합니다.", "pages/8_training_lab.py"),
-    ("09 · MLOPS", "Model Registry", "후보 모델 비교, 배포와 롤백을 제어합니다.", "pages/9_model_registry.py"),
-    ("10 · HUMAN LOOP", "Review Queue", "애매한 판정을 검수해 데이터셋으로 되돌립니다.", "pages/10_review_queue.py"),
-    ("11 · EDGE AI", "Edge Runtime", "PyTorch, ONNX Runtime과 TensorRT 성능을 비교합니다.", "pages/11_edge_runtime_benchmark.py"),
-]
-
-for row_start in range(0, len(modules), 4):
-    columns = st.columns(4, gap="medium")
-    for column, (code, title, description, page) in zip(columns, modules[row_start : row_start + 4]):
-        with column:
-            module_card(code, title, description)
-            st.page_link(page, label="모듈 열기 →", use_container_width=True)
+module_grid(
+    [
+        {
+            "code": "03 / PRODUCTION VISION",
+            "title": "Deep PatchCore 산업 결함검사",
+            "description": "MVTec AD 기반 생산 모델과 패치 단위 이상 위치를 실시간으로 분석합니다.",
+            "tag": "PRIMARY INSPECTION",
+            "href": "/deep_patchcore_mvtec",
+            "featured": True,
+        },
+        {
+            "code": "05 / CLOSED-LOOP CONTROL",
+            "title": "ROS2 자동 선별 파이프라인",
+            "description": "검사 판정부터 Reject Action 피드백까지 Physical AI 폐루프를 재현합니다.",
+            "tag": "PRIMARY AUTOMATION",
+            "href": "/ros2_sorting_pipeline",
+            "featured": True,
+        },
+        {"code": "04 / LIVE VISION", "title": "실시간 검사", "description": "카메라와 영상 스트림을 프레임 단위로 검사합니다.", "href": "/realtime_inspection"},
+        {"code": "06 / DIGITAL TWIN", "title": "액추에이터 트윈", "description": "컨베이어와 선별 게이트 동작을 시각적으로 검증합니다.", "href": "/actuator_digital_twin"},
+        {"code": "07 / EDGE AI", "title": "Edge Runtime", "description": "PyTorch, ONNX Runtime과 TensorRT 성능을 비교합니다.", "href": "/edge_runtime_benchmark"},
+        {"code": "01 / CLASSIC VISION", "title": "기준 영상 검사", "description": "기준 제품과 픽셀 차이를 비교하는 빠른 MVP 검사입니다.", "href": "/vision_inspection"},
+        {"code": "02 / PATCH MEMORY", "title": "학습형 패치 검사", "description": "정상 제품만으로 학습한 경량 비지도 이상 탐지입니다.", "href": "/trained_patch_model"},
+        {"code": "08 / DATA OPS", "title": "Dataset Studio", "description": "수집, 라벨링과 데이터 분할을 관리합니다.", "href": "/dataset_studio"},
+        {"code": "09 / TRAINING", "title": "Training Lab", "description": "학습, 임계값 보정과 평가 리포트를 생성합니다.", "href": "/training_lab"},
+        {"code": "10 / MLOPS", "title": "Model Registry", "description": "후보 모델 비교, 배포와 롤백을 제어합니다.", "href": "/model_registry"},
+        {"code": "11 / HUMAN LOOP", "title": "Review Queue", "description": "애매한 판정을 검수해 데이터셋으로 되돌립니다.", "href": "/review_queue"},
+    ]
+)

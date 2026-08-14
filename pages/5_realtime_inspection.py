@@ -30,6 +30,7 @@ ARTIFACTS = ROOT / "artifacts" / "realtime"
 DEFECTS = ARTIFACTS / "defects"
 
 st.set_page_config(page_title="AI-QCell Realtime", page_icon="🎥", layout="wide")
+inject_global_css()
 st.markdown(
     """
     <style>
@@ -60,7 +61,6 @@ if "realtime_store" not in st.session_state:
 
 store: RealtimeInspectionStore = st.session_state.realtime_store
 
-inject_global_css()
 page_header(
     "LIVE VISION · STREAM INFERENCE",
     "실시간 Deep PatchCore 검사",

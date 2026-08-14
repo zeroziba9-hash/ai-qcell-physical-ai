@@ -23,6 +23,7 @@ REPORT_PATH = ROOT / "docs" / "results" / "edge_runtime_benchmark.json"
 VISUAL_PATH = ROOT / "docs" / "images" / "edge_runtime_benchmark.png"
 
 st.set_page_config(page_title="AI-QCell Edge Runtime", page_icon="⚡", layout="wide")
+inject_global_css()
 st.markdown(
     """
     <style>
@@ -45,7 +46,6 @@ onnx_path = EDGE_ROOT / f"deep_patchcore_{version_id}.onnx"
 engine_path = EDGE_ROOT / f"deep_patchcore_{version_id}.engine"
 readiness = runtime_readiness()
 
-inject_global_css()
 page_header(
     "EDGE DEPLOYMENT · RUNTIME BENCHMARK",
     "Edge AI Runtime Benchmark",

@@ -11,6 +11,7 @@ from qcell.vision import generate_demo_pair, inspect_against_reference
 
 
 st.set_page_config(page_title="AI-QCell Vision", page_icon="🔍", layout="wide")
+inject_global_css()
 
 st.markdown(
     """
@@ -27,7 +28,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-inject_global_css()
 page_header(
     "CLASSIC VISION · REFERENCE INSPECTION",
     "AI 비전 불량검사",

@@ -20,6 +20,7 @@ MODEL_PATH, MODEL_VERSION = ModelRegistry(REGISTRY_ROOT).resolve_model_path(FALL
 DATASET_PATH = ROOT / "data" / "mvtec-ad" / "bottle"
 
 st.set_page_config(page_title="AI-QCell Digital Twin", page_icon="🏭", layout="wide")
+inject_global_css()
 st.markdown(
     """
     <style>
@@ -94,7 +95,6 @@ def twin_html(decision: str, product_id: str, score: float) -> str:
     """
 
 
-inject_global_css()
 page_header(
     "PHYSICAL AI · ACTUATOR TWIN",
     "자동 선별 액추에이터 디지털 트윈",
