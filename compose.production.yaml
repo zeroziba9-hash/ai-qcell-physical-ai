@@ -1,0 +1,16 @@
+services:
+  ai-qcell:
+    image: ghcr.io/zeroziba9-hash/ai-qcell-physical-ai:${IMAGE_TAG:-latest}
+    ports:
+      - "${PORT:-8501}:${PORT:-8501}"
+    volumes:
+      - qcell-artifacts:/app/artifacts
+    environment:
+      PORT: "${PORT:-8501}"
+      QCELL_AUTH_MODE: "${QCELL_AUTH_MODE:-strict}"
+      QCELL_USERS_JSON: "${QCELL_USERS_JSON:-}"
+      STREAMLIT_SERVER_MAX_UPLOAD_SIZE: "500"
+    restart: unless-stopped
+
+volumes:
+  qcell-artifacts:

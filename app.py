@@ -1,15 +1,25 @@
 from __future__ import annotations
 
+from datetime import datetime
+from pathlib import Path
+
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
 from qcell import LineSimulator
+from qcell.auth import RUN_INSPECTION, session_principal
+from qcell.traceability import TraceabilityStore
 from qcell.ui import inject_global_css, module_grid, page_header, section_header, status_strip, workflow_strip
 
 
+ROOT = Path(__file__).resolve().parent
+TRACE_DATABASE = ROOT / "artifacts" / "traceability" / "qcell.db"
+
 st.set_page_config(page_title="AI-QCell", page_icon="🏭", layout="wide")
 inject_global_css()
+principal = session_principal(st.session_state)
+trace_store = TraceabilityStore(TRACE_DATABASE)
 
 page_header(
     "PHYSICAL AI · QUALITY OPERATING SYSTEM",
@@ -20,9 +30,6 @@ page_header(
 
 if "events" not in st.session_state:
     st.session_state.events = []
-if "simulator" not in st.session_state:
-    st.session_state.simulator = LineSimulator(defect_rate=0.12, seed=7)
-
 events = pd.DataFrame(st.session_state.events)
 status_strip(
     [
@@ -40,10 +47,27 @@ with st.sidebar:
     defect_rate = st.slider("가상 불량률", 0, 50, 12, 1) / 100
     batch_size = st.slider("검사할 제품 수", 1, 50, 10)
 
-    if st.button("검사 배치 실행", type="primary", use_container_width=True):
-        simulator = LineSimulator(defect_rate=defect_rate)
-        st.session_state.events.extend(simulator.inspect_next().to_dict() for _ in range(batch_size))
+    if st.button(
+        "검사 배치 실행",
+        type="primary",
+        disabled=not principal.can(RUN_INSPECTION),
+        use_container_width=True,
+    ):
+        simulator = LineSimulator(defect_rate=defect_rate, seed=7 + len(st.session_state.events))
+        lot_id = f"LIVE-{datetime.now().strftime('%Y%m%d')}"
+        for _ in range(batch_size):
+            event = simulator.inspect_next().to_dict()
+            event["product_id"] = f"Q-{len(st.session_state.events) + 1:05d}"
+            event["lot_id"] = lot_id
+            st.session_state.events.append(event)
+            trace_store.record_inspection(
+                event,
+                model_version="deep-patchcore-production",
+                actor=principal.username,
+            )
         st.rerun()
+    if not principal.can(RUN_INSPECTION):
+        st.caption("배치 실행은 Operator 이상 로그인이 필요합니다.")
 
     if st.button("기록 초기화", use_container_width=True):
         st.session_state.events = []
@@ -138,5 +162,7 @@ module_grid(
         {"code": "10 / MLOPS", "title": "Model Registry", "description": "후보 모델 비교, 배포와 롤백을 제어합니다.", "href": "/model_registry"},
         {"code": "11 / HUMAN LOOP", "title": "Review Queue", "description": "애매한 판정을 검수해 데이터셋으로 되돌립니다.", "href": "/review_queue"},
         {"code": "12 / QUALITY OPS", "title": "교대 품질 분석", "description": "SPC 관리도, 결함 Pareto와 운영 알람을 교대 리포트로 저장합니다.", "href": "/quality_analytics"},
+        {"code": "14 / TRACEABILITY", "title": "제품 추적성·CAPA", "description": "제품 계보, 시정조치 상태와 변경 감사 로그를 영구 보존합니다.", "href": "/traceability"},
+        {"code": "13 / SECURITY", "title": "접근 제어", "description": "검사자·품질관리자·관리자의 운영 권한을 분리합니다.", "href": "/access_control"},
     ]
 )

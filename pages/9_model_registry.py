@@ -7,6 +7,7 @@ import pandas as pd
 import streamlit as st
 
 from qcell.ui import inject_global_css, page_header, workflow_strip
+from qcell.auth import MANAGE_MODELS, session_principal
 
 from qcell.active_learning import ensure_baseline_registered
 from qcell.model_registry import ModelRegistry
@@ -21,6 +22,8 @@ BASELINE_REPORT = ROOT / "docs" / "results" / "deep_patchcore_bottle_report.json
 
 st.set_page_config(page_title="AI-QCell Model Registry", page_icon="📦", layout="wide")
 inject_global_css()
+principal = session_principal(st.session_state)
+can_manage_models = principal.can(MANAGE_MODELS)
 st.markdown(
     """
     <style>
@@ -109,13 +112,17 @@ with actions:
     if st.button(
         "선택 버전을 PRODUCTION 배포",
         type="primary",
-        disabled=is_current,
+        disabled=is_current or not can_manage_models,
         width="stretch",
     ):
         registry.deploy(selected_id, reason="model-registry-ui")
         st.success(f"{selected_id} 배포 완료")
         st.rerun()
-    if st.button("이전 배포로 롤백", width="stretch"):
+    if st.button(
+        "이전 배포로 롤백",
+        disabled=not can_manage_models,
+        width="stretch",
+    ):
         try:
             rolled_back = registry.rollback()
             st.success(f"{rolled_back.version_id}로 롤백했습니다.")
@@ -123,6 +130,8 @@ with actions:
         except ValueError as error:
             st.warning(str(error))
     st.caption("배포 포인터만 원자적으로 변경하므로 원본 모델 파일과 학습 결과는 보존됩니다.")
+    if not can_manage_models:
+        st.info("모델 배포와 롤백은 Admin 로그인이 필요합니다.")
 
 history = registry.deployment_history()
 st.markdown("### 배포 이력")

@@ -23,7 +23,7 @@ def test_design_system_includes_responsive_and_accessible_states() -> None:
     assert "@media (prefers-reduced-motion: reduce)" in GLOBAL_CSS
     assert ":focus-visible" in GLOBAL_CSS
     assert "--q-cyan" in GLOBAL_CSS
-    assert ".qcell-nav-link.is-active" in GLOBAL_CSS
+    assert '[data-testid="stPageLink"] a[aria-current="page"]' in GLOBAL_CSS
     assert '[data-testid="stHeader"]' in GLOBAL_CSS
     assert "text-overflow: clip !important" in GLOBAL_CSS
     assert ':has(> [data-testid="stColumn"]:nth-child(5):last-child' in GLOBAL_CSS
@@ -35,11 +35,13 @@ def test_navigation_covers_every_operational_page_once() -> None:
     links = [link for _, group_links in NAV_GROUPS for link in group_links]
     pages = [page for page, _ in links]
 
-    assert len(NAV_GROUPS) == 4
-    assert len(pages) == 13
+    assert len(NAV_GROUPS) == 5
+    assert len(pages) == 15
     assert len(set(pages)) == len(pages)
     assert pages[0] == "app.py"
     assert "pages/12_quality_analytics.py" in pages
+    assert "pages/13_access_control.py" in pages
+    assert "pages/14_traceability.py" in pages
     assert "pages/3_deep_patchcore_mvtec.py" in pages
     assert "pages/11_edge_runtime_benchmark.py" in pages
 

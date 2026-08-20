@@ -16,7 +16,7 @@ AI-QCell은 가상 생산라인, 기준 이미지 비교, 정상 제품만 학�
 ![AI-QCell 통합 운영 대시보드](docs/images/ui_dashboard_redesign.png)
 
 산업용 관제 화면을 기준으로 전체 Streamlit UI를 통일했습니다. 공정 상태, 검사 KPI, Physical AI 폐루프와
-12개 운영 모듈을 한 화면에서 확인하고 바로 이동할 수 있으며 데스크톱·태블릿·모바일 레이아웃을 지원합니다.
+14개 운영 모듈을 한 화면에서 확인하고 바로 이동할 수 있으며 데스크톱·태블릿·모바일 레이아웃을 지원합니다.
 
 ## 교대 품질 분석 · SPC 리포트
 
@@ -31,6 +31,37 @@ AI-QCell은 가상 생산라인, 기준 이미지 비교, 정상 제품만 학�
 - 목표 불량률, p95 추론 SLA, 평균 신뢰도 기반 알람 룰
 - 원시 검사 이력 CSV와 감사용 품질 리포트 JSON 다운로드
 - 이름·저장 시각·핵심 KPI가 포함된 리포트 스냅샷 이력
+
+## 제품 추적성 · CAPA · 감사 로그
+
+![AI-QCell 제품 추적성 및 CAPA](docs/images/traceability.png)
+
+`제품 추적 · CAPA` 모듈은 검사 결과를 단순 차트가 아니라 현장에서 추적 가능한 품질 기록으로 남깁니다.
+
+- 제품 ID·Lot·공정별 PASS/REJECT 검사 이벤트와 모델 버전 보존
+- 선택한 제품의 투입 → 검사 → 선별 타임라인 및 원시 CSV 내보내기
+- 품질 알람에서 CAPA 자동 생성, 중복 방지와 `OPEN → ACKNOWLEDGED → IN_PROGRESS → VERIFIED → CLOSED` 상태 전이
+- 조치 담당자·원인·검증 결과를 포함한 변경 감사 로그
+- SQLite WAL 기반 영속 저장소(`artifacts/traceability/qcell.db`)
+- 운영자·품질 관리자·관리자 역할별 실행 권한 제어
+
+![AI-QCell CAPA 워크플로](docs/images/capa_workflow.png)
+
+왼쪽 메뉴는 Streamlit 네이티브 페이지 링크를 사용하므로 페이지 전환 때 전체 브라우저 문서를 다시 여는 현상을 줄이고 앱 셸을 유지합니다.
+
+## 접근 제어
+
+`접근 제어` 페이지에서 로그인 상태와 역할별 권한 매트릭스를 확인할 수 있습니다. 기본 데모 계정은 로컬 포트폴리오 시연용입니다.
+
+| 계정 | 비밀번호 | 역할 |
+|---|---|---|
+| `operator` | `qcell-operator` | 검사 실행 |
+| `quality` | `qcell-quality` | 검토·CAPA 관리 |
+| `admin` | `qcell-admin` | 전체 권한 |
+
+![AI-QCell 역할 기반 접근 제어](docs/images/access_control.png)
+
+공개 배포에서는 `QCELL_AUTH_MODE=strict`로 설정하고 `QCELL_USERS_JSON`에 별도 PBKDF2 해시 계정을 등록하세요. 해시는 로컬 demo 모드에서 접근 제어 페이지의 관리자 도구로 만들 수 있습니다.
 
 ## 시각화 결과
 
@@ -182,10 +213,27 @@ python -m scripts.export_edge_model --build-tensorrt
 python -m scripts.benchmark_edge_runtime --include-cpu
 ```
 
-## Docker
+## Docker · 공개 배포
+
+로컬 컨테이너는 포트와 헬스체크를 자동으로 맞춥니다.
 
 ```powershell
 docker compose up --build
+```
+
+GitHub Container Registry에 게시된 이미지는 운영용 Compose로 실행할 수 있습니다.
+
+```powershell
+docker compose -f compose.production.yaml up -d
+```
+
+릴리스 태그(`v*`)를 푸시하거나 GitHub Actions의 `Publish Container` 워크플로를 수동 실행하면 `ghcr.io/zeroziba9-hash/ai-qcell-physical-ai` 이미지가 발행됩니다. `render.yaml`은 Render Blueprint 배포, 영속 디스크, Streamlit의 `/_stcore/health` 헬스체크와 `PORT` 바인딩을 함께 정의합니다.
+
+Render Blueprint 배포 시 `QCELL_USERS_JSON`은 필수 비밀 값으로 입력해야 합니다. 다른 공개 환경에서도 다음 값을 비밀 환경 변수로 등록하세요.
+
+```text
+QCELL_AUTH_MODE=strict
+QCELL_USERS_JSON=[{"username":"...","display_name":"...","role":"admin","salt":"...","password_hash":"<PBKDF2 hex>"}]
 ```
 
 ## ROS2 Jazzy on Ubuntu 24.04 WSL2
@@ -209,4 +257,5 @@ pytest
 - Phase 3: ROS2 Topic/Action 자동 선별 파이프라인 완료
 - Phase 4: 실시간 카메라·영상 검사 및 액추에이터 디지털 트윈 완료
 - Phase 5: SPC·Pareto·운영 알람 기반 교대 품질 리포트 완료
+- Phase 6: 제품 추적성·CAPA·RBAC·감사 로그·컨테이너 배포 완료
 
